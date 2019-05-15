@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tech.picnic</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>0.0.2</version>
+    </parent>
+
+    <groupId>tech.picnic.jolo</groupId>
+    <artifactId>jolo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <name>Picnic :: Jolo</name>
+    <description>A relational mapper for jOOQ.</description>
+    <url>https://github.com/PicnicSupermarket/jolo</url>
+    <inceptionYear>2019</inceptionYear>
+
+    <developers>
+        <developer>
+            <name>Csaba Juhasz</name>
+            <email>csaba.juhasz@teampicnic.com</email>
+            <organization>Picnic Technologies BV</organization>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+        <developer>
+            <name>Ivan Babiankou</name>
+            <email>ivan.babiankou@teampicnic.com</email>
+            <organization>Picnic Technologies BV</organization>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+        <developer>
+            <name>Max Sumrall</name>
+            <email>max.sumrall@teampicnic.com</email>
+            <organization>Picnic Technologies BV</organization>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+        <developer>
+            <name>Prashant Julka</name>
+            <email>prashant.julka@teampicnic.com</email>
+            <organization>Picnic Technologies BV</organization>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+        <developer>
+            <name>Sjoerd Cranen</name>
+            <email>sjoerd.cranen@teampicnic.com</email>
+            <organization>Picnic Technologies BV</organization>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+        <developer>
+            <name>Stephan Schroevers</name>
+            <email>stephan.schroevers@teampicnic.com</email>
+            <organization>Picnic Technologies BV</organization>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <developerConnection>scm:git:git@github.com:PicnicSupermarket/jolo.git</developerConnection>
+        <url>https://github.com/PicnicSupermarket/jolo</url>
+        <tag>HEAD</tag>
+    </scm>
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/PicnicSupermarket/jolo/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>Travis CI</system>
+        <url>https://travis-ci.org/PicnicSupermarket/jolo</url>
+    </ciManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.5.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-testCompile</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <configuration>
+                                <compilerArgs combine.children="append">
+                                    <!-- XXX: We disable `html` checks to work
+                                    around a jOOQ codegen issue; file a PR for
+                                    that. -->
+                                    <arg>-Xdoclint:-html</arg>
+                                </compilerArgs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <!-- XXX: The `jooq-codegen-maven` plugin
+                        unconditionally registers the directory in which it
+                        generates code as a (main) compile source root. But in
+                        this project the generated code is actually _test_
+                        code, so we must take care to exclude it during the
+                        Javadoc generation process. Flag this issue with jOOQ
+                        to get it resolved. -->
+                        <sourcepath>src/main/java</sourcepath>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <configuration>
+                        <!-- XXX: The `jooq-codegen-maven` plugin
+                        unconditionally registers the directory in which it
+                        generates code as a (main) compile source root. But in
+                        this project the generated code is actually _test_
+                        code, so we must take care not to package it as if it
+                        were our primary source code. We do so using a
+                        whitelist, because it appears that the
+                        `maven-source-plugin` does not support _exclusion_ of
+                        selected files. -->
+                        <includes>
+                            <include>**/jolo/*.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <!-- XXX: We require this plugin execution only because there
+                is no way to tell the `jooq-codegen-maven` that it generates
+                _test_ code. File an issue with jOOQ to discuss improving this.
+                (See also the `maven-javadoc-plugin` and `maven-source-plugin`
+                plugin customizations above.) -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-test-sources</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-test-sources/jooq</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generator>
+                        <database>
+                            <name>org.jooq.meta.extensions.ddl.DDLDatabase</name>
+                            <properties>
+                                <property>
+                                    <key>scripts</key>
+                                    <value>${project.basedir}/src/test/resources/db/ddl.sql</value>
+                                </property>
+                            </properties>
+                            <forcedTypes>
+                                <forcedType>
+                                    <userType>Long[]</userType>
+                                    <expression>.*\.RELATEDFOOIDS</expression>
+                                    <converter>org.jooq.Converter.ofNullable(Object[].class, Long[].class, i -&gt; (Long[])i, i -&gt; i)</converter>
+                                </forcedType>
+                            </forcedTypes>
+                        </database>
+                        <generate>
+                            <varargSetters>false</varargSetters>
+                        </generate>
+                        <target>
+                            <packageName>tech.picnic.jolo.data.schema</packageName>
+                            <directory>${project.build.directory}/generated-test-sources/jooq</directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

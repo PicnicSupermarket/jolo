@@ -1,0 +1,30 @@
+language: java
+matrix:
+  include:
+    - jdk: openjdk8
+      # This is the primary target platform. In this build we track test
+      # coverage and perform a SonarQube analysis.
+      script:
+        - ./mvnw install
+        - ./mvnw jacoco:prepare-agent surefire:test jacoco:report sonar:sonar
+    - jdk: openjdk11
+      script: ./mvnw install
+addons:
+  sonarcloud:
+    organization: picnic-technologies
+    token: "${SONARCLOUD_TOKEN}"
+install: mvn io.takari:maven:wrapper
+before_cache:
+  # Don't cache the artifacts we just generated, for multiple reasons: (1) we
+  # shouldn't need them next time around and (2) if we do, that indicates a
+  # dependency issue which might otherwise go unnoticed until next time we bump
+  # the project's version (i.e., when tagging).
+  - find "${HOME}/.m2/repository" -depth -name '*-SNAPSHOT' -exec rm -r '{}' \;
+cache:
+  directories:
+    # The local Maven repository in which third party dependencies are stored.
+    - ${HOME}/.m2/repository
+    # The Takari Maven Wrapper's storage for downloaded Maven distributions.
+    - ${HOME}/.m2/wrapper
+    # The SonarQube analysis cache.
+    - ${HOME}/.sonar/cache

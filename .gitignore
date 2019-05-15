@@ -1,0 +1,11 @@
+# General Java development.
+.attach_pid*
+.classpath
+.DS_Store
+.factorypath
+.idea
+.project
+.settings
+target
+*.iml
+*.swp
