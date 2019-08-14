@@ -163,7 +163,7 @@ deleted than added.)
 [jolo-image]: https://i.imgur.com/MThi0ae.jpg
 [jooq]: https://www.jooq.org
 [maven-central-badge]: https://img.shields.io/maven-central/v/tech.picnic.jolo/jolo.svg
-[maven-central-browse]: https://repo1.maven.org/maven2/tech/picnic/jolo
+[maven-central-browse]: https://repo1.maven.org/maven2/tech/picnic/jolo/
 [maven-central-search]: https://search.maven.org
 [new-issue]: https://github.com/PicnicSupermarket/jolo/issues/new
 [new-pr]: https://github.com/PicnicSupermarket/jolo/compare
