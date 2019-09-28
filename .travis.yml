@@ -28,3 +28,5 @@ cache:
     - ${HOME}/.m2/wrapper
     # The SonarQube analysis cache.
     - ${HOME}/.sonar/cache
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
