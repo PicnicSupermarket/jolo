@@ -5,7 +5,7 @@
     <parent>
         <groupId>tech.picnic</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3</version>
     </parent>
 
     <groupId>tech.picnic.jolo</groupId>
@@ -72,7 +72,6 @@
 
     <properties>
         <version.immutables>2.8.3</version.immutables>
-        <version.jooq>3.12.1</version.jooq>
     </properties>
 
     <dependencyManagement>
