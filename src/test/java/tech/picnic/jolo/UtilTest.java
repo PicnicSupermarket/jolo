@@ -23,14 +23,14 @@ public final class UtilTest {
   public void testEqualsOnFields() {
     Field<Long> withSchema = DSL.field(DSL.name("PUBLIC", "FOO", "ID"), Long.class);
     Field<Long> noSchema = DSL.field(DSL.name("FOO", "ID"), Long.class);
-    assertTrue(FOO.ID.equals(withSchema));
+    assertFalse(FOO.ID.equals(withSchema));
     assertFalse(withSchema.equals(FOO.ID));
     assertFalse(FOO.ID.equals(noSchema));
-    assertFalse(noSchema.equals(FOO.ID));
+    assertTrue(noSchema.equals(FOO.ID));
 
     // Also documenting this oddity: the qualified name of FOO.ID is not "PUBLIC.FOO.ID", even
     // though it is only considered equal to a field that has the "PUBLIC" qualifier.
-    assertEquals(FOO.ID.toString(), "\"PUBLIC\".\"FOO\".\"ID\"");
+    assertEquals(FOO.ID.toString(), "\"FOO\".\"ID\"");
     assertEquals(FOO.ID.getQualifiedName(), DSL.name("FOO", "ID"));
     assertEquals(withSchema.getQualifiedName(), DSL.name("PUBLIC", "FOO", "ID"));
     assertEquals(noSchema.getQualifiedName(), DSL.name("FOO", "ID"));

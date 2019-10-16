@@ -72,6 +72,7 @@
 
     <properties>
         <version.immutables>2.8.3</version.immutables>
+        <version.jooq>3.12.1</version.jooq>
     </properties>
 
     <dependencyManagement>
@@ -263,7 +264,7 @@
                             <forcedTypes>
                                 <forcedType>
                                     <userType>Long[]</userType>
-                                    <expression>.*\.RELATEDFOOIDS</expression>
+                                    <includeExpression>.*\.RELATEDFOOIDS</includeExpression>
                                     <converter>org.jooq.Converter.ofNullable(Object[].class, Long[].class, i -&gt; (Long[])i, i -&gt; i)</converter>
                                 </forcedType>
                             </forcedTypes>
