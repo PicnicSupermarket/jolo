@@ -3,6 +3,7 @@ package tech.picnic.jolo;
 import com.google.errorprone.annotations.FormatMethod;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -14,20 +15,22 @@ import org.jooq.UniqueKey;
 final class Util {
   private Util() {}
 
-  static <R extends Record> TableField<R, Long> getPrimaryKey(Table<R> table) {
+  static <R extends Record, K> TableField<R, K> getPrimaryKey(Table<R> table) {
     return getKey(table, table.getPrimaryKey().getFields(), "primary");
   }
 
-  static <L extends Record, R extends Record> TableField<?, Long> getForeignKey(
+  @SuppressWarnings("unchecked")
+  static <L extends Record, R extends Record, K> TableField<?, K> getForeignKey(
       Table<L> from, Table<R> into) {
-    return getOptionalForeignKey(from, into)
-        .orElseThrow(
-            () ->
-                new IllegalArgumentException(
-                    String.format("Table %s has no foreign key into %s", from, into)));
+    return (TableField<?, K>)
+        getOptionalForeignKey(from, into)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        String.format("Table %s has no foreign key into %s", from, into)));
   }
 
-  static <L extends Record, R extends Record> Optional<TableField<?, Long>> getOptionalForeignKey(
+  static <L extends Record, R extends Record, K> Optional<TableField<?, K>> getOptionalForeignKey(
       Table<L> from, Table<R> into) {
     Table<L> fromTable = Util.unalias(from);
     Table<R> intoTable = Util.unalias(into);
@@ -61,15 +64,15 @@ final class Util {
     }
   }
 
-  private static <R extends Record> TableField<R, Long> getKey(
+  private static <R extends Record, K> TableField<R, K> getKey(
       Table<R> table, List<TableField<R, ?>> fields, String keyType) {
     validate(fields.size() == 1, "Compound %s keys are not supported", keyType);
     validate(
-        Long.class.equals(fields.get(0).getType()),
-        "Only %s keys of type Long are supported",
+        Long.class.equals(fields.get(0).getType()) || UUID.class.equals(fields.get(0).getType()),
+        "Only %s keys of type Long or UUID are supported",
         keyType);
     @SuppressWarnings("unchecked")
-    TableField<R, Long> field = (TableField<R, Long>) table.field(fields.get(0));
+    TableField<R, K> field = (TableField<R, K>) table.field(fields.get(0));
     return field;
   }
 

@@ -26,7 +26,7 @@ import tech.picnic.jolo.data.schema.tables.records.FooRecord;
 public final class EntityTest {
   @Test
   public void testGetters() {
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
     assertEquals(aEntity.getPrimaryKey(), FOO.ID);
     assertEquals(aEntity.getTable(), FOO);
   }
@@ -34,27 +34,28 @@ public final class EntityTest {
   @Test
   public void testGettersAliased() {
     Table<?> bar = FOO.as("BAR");
-    Entity<?, ?> aEntity = new Entity<>(bar, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(bar, FooEntity.class);
     assertEquals(aEntity.getPrimaryKey(), bar.field(FOO.ID));
     assertEquals(aEntity.getTable(), bar);
   }
 
   @Test
   public void testLoad() {
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, Long> aEntity = new Entity<>(FOO, FooEntity.class);
     aEntity.load(new FooRecord(1L, 1, null));
-    Assertions.assertEquals(aEntity.get(1), new FooEntity(1L, 1, null));
+    Assertions.assertEquals(aEntity.get(1L), new FooEntity(1L, 1, null));
   }
 
   @Test
   public void testLoadExtraAttributes() {
     Field<?> v = DSL.field("v", Integer.class);
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class).withExtraFields(v);
+    Entity<?, ?, Long> aEntity =
+        new Entity<FooEntity, FooRecord, Long>(FOO, FooEntity.class).withExtraFields(v);
     Record record =
         createRecord(
             ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 1, FOO.RELATEDFOOIDS, new Long[0], v, 2));
     aEntity.load(record);
-    Assertions.assertEquals(aEntity.get(1), new FooEntity(1L, 1, new Long[0], 2));
+    Assertions.assertEquals(aEntity.get(1L), new FooEntity(1L, 1, new Long[0], 2));
   }
 
   @Test
@@ -62,22 +63,22 @@ public final class EntityTest {
     Field<Long> id = DSL.field("id", Long.class);
     Field<Integer> foo = DSL.field("foo", Integer.class);
     Table<Record2<Long, Integer>> adHoc = DSL.select(id, foo).asTable("AdHoc");
-    Entity<?, ?> aEntity = new Entity<>(adHoc, FooEntity.class, adHoc.field(id));
+    Entity<?, ?, Long> aEntity = new Entity<>(adHoc, FooEntity.class, adHoc.field(id));
     Record record = createRecord(ImmutableMap.of(adHoc.field(id), 1L, adHoc.field(foo), 1));
     aEntity.load(record);
-    Assertions.assertEquals(aEntity.get(1), new FooEntity(1L, 1, null));
+    Assertions.assertEquals(aEntity.get(1L), new FooEntity(1L, 1, null));
   }
 
   @Test
   public void testCopy() {
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
     aEntity.load(new FooRecord(1L, 1, null));
     assertTrue(aEntity.copy().getEntities().isEmpty());
   }
 
   @Test
   public void testLoadMultiple() {
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
     aEntity.load(new FooRecord(2L, 1, null));
     aEntity.load(new FooRecord(1L, 1, null));
     assertIterableEquals(
@@ -87,7 +88,7 @@ public final class EntityTest {
 
   @Test
   public void testLoadTwice() {
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
     aEntity.load(new FooRecord(1L, 1, null));
     aEntity.load(new FooRecord(1L, 2, null));
     assertEquals(aEntity.getEntityMap(), ImmutableMap.of(1L, new FooEntity(1L, 1, null)));
@@ -95,7 +96,7 @@ public final class EntityTest {
 
   @Test
   public void testLoadAbsent() {
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
     aEntity.load(new FooRecord(null, null, null));
     assertTrue(aEntity.getEntities().isEmpty());
   }
@@ -103,7 +104,7 @@ public final class EntityTest {
   @Test
   public void testLoadWrongTable() {
     Foo bar = FOO.as("BAR");
-    Entity<?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
+    Entity<?, ?, ?> aEntity = new Entity<>(FOO, FooEntity.class);
     Record record = createRecord(ImmutableMap.of(bar.ID, 1L, bar.FOO_, 1));
     assertThrows(ValidationException.class, () -> aEntity.load(record));
   }

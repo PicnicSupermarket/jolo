@@ -50,11 +50,9 @@ dependencies {
 
 ## Limitations
 
-- Only primary / foreign keys of (Java) type `long` are supported. We have no
-  intention to support composite foreign keys for the time being. For keys of
-  different types (e.g.  `String`) we would accept pull requests, but only if
-  this does not further complicate the interface of the library (no long type
-  parameter lists).
+- Only primary / foreign keys of (Java) type `long` and `UUID` are accepted
+  (although the type is generic and other types can also be accepted now).
+  We have no intention to support composite foreign keys for the time being.
 - Relation mapping does not work yet for entities that are not based on a table
   in the DB schema.
 

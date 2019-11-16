@@ -17,19 +17,20 @@ import tech.picnic.jolo.Relation.Arity;
  * Class used to specify a {@link Relation}. Cannot be instantiated directly, but is created as part
  * of the fluent API {@link LoaderFactory#create(Entity)}.
  */
-public final class RelationBuilder<T, L, R> {
+public final class RelationBuilder<T, L, R, K> {
   private final LoaderFactoryBuilderImpl<T> builder;
-  private final Entity<L, ?> left;
-  private final Entity<R, ?> right;
-  @Nullable private Field<Long> leftKey;
-  @Nullable private Field<Long> rightKey;
+  private final Entity<L, ?, K> left;
+  private final Entity<R, ?, K> right;
+  @Nullable private Field<K> leftKey;
+  @Nullable private Field<K> rightKey;
   @Nullable private Arity leftArity;
   @Nullable private Arity rightArity;
   @Nullable private BiConsumer<L, ?> leftSetter;
   @Nullable private BiConsumer<R, ?> rightSetter;
-  private Optional<BiConsumer<Record, Set<Relation.Pair>>> relationLoader = Optional.empty();
+  private Optional<BiConsumer<Record, Set<Relation.Pair<K>>>> relationLoader = Optional.empty();
 
-  RelationBuilder(LoaderFactoryBuilderImpl<T> builder, Entity<L, ?> left, Entity<R, ?> right) {
+  RelationBuilder(
+      LoaderFactoryBuilderImpl<T> builder, Entity<L, ?, K> left, Entity<R, ?, K> right) {
     this.builder = builder;
     this.left = left;
     this.right = right;
@@ -70,38 +71,37 @@ public final class RelationBuilder<T, L, R> {
   /**
    * Specifies that the given field is a not-null foreign key for an optional one-to-one relation.
    */
-  public RelationBuilder<T, L, R> oneToZeroOrOne(TableField<?, Long> field) {
+  public RelationBuilder<T, L, R, K> oneToZeroOrOne(TableField<?, K> field) {
     setType(field, checkKey(field), Arity.ZERO_OR_ONE, Arity.ONE);
     return this;
   }
 
   /** Specifies that the given field is a nullable foreign key for a one-to-one relation. */
-  public RelationBuilder<T, L, R> optionalOneToOne(TableField<?, Long> field) {
+  public RelationBuilder<T, L, R, K> optionalOneToOne(TableField<?, K> field) {
     setType(field, checkKey(field), Arity.ZERO_OR_ONE, Arity.ZERO_OR_ONE);
     return this;
   }
 
   /** Specifies that the given field is a not-null foreign key for a one-to-one relation. */
-  public RelationBuilder<T, L, R> oneToOne(TableField<?, Long> field) {
+  public RelationBuilder<T, L, R, K> oneToOne(TableField<?, K> field) {
     setType(field, checkKey(field), Arity.ONE, Arity.ONE);
     return this;
   }
 
   /** Specifies that the given field is a nullable foreign key for a one-to-many relation. */
-  public RelationBuilder<T, L, R> zeroOrOneToMany(TableField<?, Long> field) {
+  public RelationBuilder<T, L, R, K> zeroOrOneToMany(TableField<?, K> field) {
     setType(field, checkKey(field), Arity.MANY, Arity.ZERO_OR_ONE);
     return this;
   }
 
   /** Specifies that the given field is a not-null foreign key for a one-to-many relation. */
-  public RelationBuilder<T, L, R> oneToMany(TableField<?, Long> field) {
+  public RelationBuilder<T, L, R, K> oneToMany(TableField<?, K> field) {
     setType(field, checkKey(field), Arity.MANY, Arity.ONE);
     return this;
   }
 
   /** Specifies that the given fields constitute a many-to-many relation. */
-  public RelationBuilder<T, L, R> manyToMany(
-      TableField<?, Long> field1, TableField<?, Long> field2) {
+  public RelationBuilder<T, L, R, K> manyToMany(TableField<?, K> field1, TableField<?, K> field2) {
     // Requiring the fields to be from the same table is not strictly necessary.
     validate(
         field1.getTable().equals(field2.getTable()),
@@ -113,56 +113,56 @@ public final class RelationBuilder<T, L, R> {
   }
 
   /** Specifies a setter for the left-hand side of a *-to-1 relation. */
-  public RelationBuilder<T, L, R> setOneLeft(BiConsumer<L, R> setter) {
+  public RelationBuilder<T, L, R, K> setOneLeft(BiConsumer<L, R> setter) {
     validate(rightArity == Arity.ONE, "Right arity is %s", rightArity);
     leftSetter = setter;
     return this;
   }
 
   /** Specifies a setter for the right-hand side of a 1-to-* relation. */
-  public RelationBuilder<T, L, R> setOneRight(BiConsumer<R, L> setter) {
+  public RelationBuilder<T, L, R, K> setOneRight(BiConsumer<R, L> setter) {
     validate(leftArity == Arity.ONE, "Left arity is %s", leftArity);
     rightSetter = setter;
     return this;
   }
 
   /** Specifies a setter for the left-hand side of a *-to-0..1 relation. */
-  public RelationBuilder<T, L, R> setZeroOrOneLeft(BiConsumer<L, Optional<R>> setter) {
+  public RelationBuilder<T, L, R, K> setZeroOrOneLeft(BiConsumer<L, Optional<R>> setter) {
     validate(rightArity == Arity.ZERO_OR_ONE, "Right arity is %s", rightArity);
     leftSetter = setter;
     return this;
   }
 
   /** Specifies a setter for the right-hand side of a 0..1-to-* relation. */
-  public RelationBuilder<T, L, R> setZeroOrOneRight(BiConsumer<R, Optional<L>> setter) {
+  public RelationBuilder<T, L, R, K> setZeroOrOneRight(BiConsumer<R, Optional<L>> setter) {
     validate(leftArity == Arity.ZERO_OR_ONE, "Left arity is %s", leftArity);
     rightSetter = setter;
     return this;
   }
 
   /** Specifies a setter for the left-hand side of a *-to-many relation. */
-  public RelationBuilder<T, L, R> setManyLeft(BiConsumer<L, List<R>> setter) {
+  public RelationBuilder<T, L, R, K> setManyLeft(BiConsumer<L, List<R>> setter) {
     validate(rightArity == Arity.MANY, "Right arity is %s", rightArity);
     leftSetter = setter;
     return this;
   }
 
   /** Specifies a setter for the right-hand side of a many-to-* relation. */
-  public RelationBuilder<T, L, R> setManyRight(BiConsumer<R, List<L>> setter) {
+  public RelationBuilder<T, L, R, K> setManyRight(BiConsumer<R, List<L>> setter) {
     validate(leftArity == Arity.MANY, "Left arity is %s", leftArity);
     rightSetter = setter;
     return this;
   }
 
   /** Specifies a function to programmatically identify relation pairs in loaded records. */
-  public RelationBuilder<T, L, R> setRelationLoader(
-      BiConsumer<Record, Set<Relation.Pair>> relationLoader) {
+  public RelationBuilder<T, L, R, K> setRelationLoader(
+      BiConsumer<Record, Set<Relation.Pair<K>>> relationLoader) {
     this.relationLoader = Optional.of(relationLoader);
     return this;
   }
 
-  private Entity<?, ?> checkKey(TableField<?, Long> field) {
-    Entity<?, ?> referencedSide = field.getTable().equals(left.getTable()) ? right : left;
+  private Entity<?, ?, ?> checkKey(TableField<?, K> field) {
+    Entity<?, ?, ?> referencedSide = field.getTable().equals(left.getTable()) ? right : left;
     validate(
         field.getTable().equals((referencedSide == left ? right : left).getTable()),
         "Foreign key should be a field of %s or %s",
@@ -172,7 +172,7 @@ public final class RelationBuilder<T, L, R> {
     return referencedSide;
   }
 
-  private void checkKey(TableField<?, Long> field, Entity<?, ?> entity) {
+  private void checkKey(TableField<?, K> field, Entity<?, ?, ?> entity) {
     validate(
         field.getTable().getReferencesTo(entity.getTable()).stream()
             .map(ForeignKey::getFields)
@@ -185,8 +185,7 @@ public final class RelationBuilder<T, L, R> {
   }
 
   @SuppressWarnings("checkstyle:HiddenField")
-  private void setType(
-      Arity leftArity, Arity rightArity, Field<Long> leftKey, Field<Long> rightKey) {
+  private void setType(Arity leftArity, Arity rightArity, Field<K> leftKey, Field<K> rightKey) {
     validate(this.leftKey == null, "Relationship type already set");
     this.leftArity = leftArity;
     this.rightArity = rightArity;
@@ -195,8 +194,8 @@ public final class RelationBuilder<T, L, R> {
   }
 
   private void setType(
-      TableField<?, Long> field,
-      Entity<?, ?> referencedSide,
+      TableField<?, K> field,
+      Entity<?, ?, ?> referencedSide,
       Arity referentArity,
       Arity referencedArity) {
     if (referencedSide == left) {

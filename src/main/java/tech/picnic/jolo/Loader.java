@@ -37,12 +37,15 @@ import org.jooq.RecordHandler;
  * therefore makes it possible to detect any misconfiguration before the query is first executed.
  */
 public final class Loader<T> implements RecordHandler<Record> {
-  private final Entity<T, ?> mainEntity;
-  private final Set<Entity<?, ?>> entities;
-  private final List<Relation<?, ?>> relations;
+  private final Entity<T, ?, ?> mainEntity;
+  private final Set<Entity<?, ?, ?>> entities;
+  private final List<Relation<?, ?, ?>> relations;
   private boolean linked = false;
 
-  Loader(Entity<T, ?> mainEntity, Set<Entity<?, ?>> entities, List<Relation<?, ?>> relations) {
+  Loader(
+      Entity<T, ?, ?> mainEntity,
+      Set<Entity<?, ?, ?>> entities,
+      List<Relation<?, ?, ?>> relations) {
     this.mainEntity = mainEntity;
     this.entities = entities;
     this.relations = relations;
@@ -83,7 +86,7 @@ public final class Loader<T> implements RecordHandler<Record> {
    * Returns the single object loaded by this loader, or throws an exception.
    *
    * @throws IllegalArgumentException if more than one object was loaded.
-   * @throws java.util.NoSuchElementException if the loader is empty.
+   * @throws NoSuchElementException if the loader is empty.
    */
   public T getOne() {
     return getOptional().orElseThrow(NoSuchElementException::new);

@@ -22,11 +22,11 @@ import org.jooq.TableField;
  * instead.
  */
 final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, LoaderFactory<T> {
-  private final Entity<T, ?> entity;
-  private final Set<Entity<?, ?>> entities = new HashSet<>();
-  private final List<Relation<?, ?>> relations = new ArrayList<>();
+  private final Entity<T, ?, ?> entity;
+  private final Set<Entity<?, ?, ?>> entities = new HashSet<>();
+  private final List<Relation<?, ?, ?>> relations = new ArrayList<>();
 
-  LoaderFactoryBuilderImpl(Entity<T, ?> entity) {
+  LoaderFactoryBuilderImpl(Entity<T, ?, ?> entity) {
     this.entity = entity;
     entities.add(entity);
   }
@@ -46,10 +46,10 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
   public Loader<T> newLoader() {
     // We use a prototype pattern to create new entities / relations that keep state about the
     // deserialisation process, by calling Entity#copy and Relation#copy.
-    Map<Entity<?, ?>, Entity<?, ?>> newEntities =
+    Map<Entity<?, ?, ?>, Entity<?, ?, ?>> newEntities =
         entities.stream().collect(toMap(identity(), Entity::copy));
     @SuppressWarnings("unchecked")
-    Entity<T, ?> mainEntity = (Entity<T, ?>) newEntities.get(entity);
+    Entity<T, ?, ?> mainEntity = (Entity<T, ?, ?>) newEntities.get(entity);
     assert mainEntity != null : "Main entity was not copied";
     return new Loader<>(
         mainEntity,
@@ -64,60 +64,62 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
    * loaded.
    */
   @Override
-  public <L, R> RelationBuilder<T, L, R> relation(Entity<L, ?> left, Entity<R, ?> right) {
+  public <L, R, K> RelationBuilder<T, L, R, K> relation(
+      Entity<L, ?, K> left, Entity<R, ?, K> right) {
     addEntity(left);
     addEntity(right);
     return new RelationBuilder<>(this, left, right);
   }
 
   @Override
-  public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> oneToMany(
-      Entity<L, L2> left, Entity<R, R2> right) {
+  public <L, R, L2 extends Record, R2 extends Record, K> RelationBuilder<T, L, R, K> oneToMany(
+      Entity<L, L2, K> left, Entity<R, R2, K> right) {
     return relation(left, right).oneToMany(getForeignKey(right.getTable(), left.getTable()));
   }
 
   @Override
-  public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> oneToOne(
-      Entity<L, L2> left, Entity<R, R2> right) {
+  public <L, R, L2 extends Record, R2 extends Record, K> RelationBuilder<T, L, R, K> oneToOne(
+      Entity<L, L2, K> left, Entity<R, R2, K> right) {
     return relation(left, right)
         .oneToOne(getForeignKeySymmetric(left.getTable(), right.getTable()));
   }
 
   @Override
-  public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> oneToZeroOrOne(
-      Entity<L, L2> left, Entity<R, R2> right) {
+  public <L, R, L2 extends Record, R2 extends Record, K> RelationBuilder<T, L, R, K> oneToZeroOrOne(
+      Entity<L, L2, K> left, Entity<R, R2, K> right) {
     return relation(left, right)
         .oneToZeroOrOne(getForeignKeySymmetric(left.getTable(), right.getTable()));
   }
 
   @Override
-  public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> optionalOneToOne(
-      Entity<L, L2> left, Entity<R, R2> right) {
+  public <L, R, L2 extends Record, R2 extends Record, K>
+      RelationBuilder<T, L, R, K> optionalOneToOne(Entity<L, L2, K> left, Entity<R, R2, K> right) {
     return relation(left, right)
         .optionalOneToOne(getForeignKeySymmetric(left.getTable(), right.getTable()));
   }
 
   @Override
-  public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> zeroOrOneToMany(
-      Entity<L, L2> left, Entity<R, R2> right) {
+  public <L, R, L2 extends Record, R2 extends Record, K>
+      RelationBuilder<T, L, R, K> zeroOrOneToMany(Entity<L, L2, K> left, Entity<R, R2, K> right) {
     return relation(left, right).zeroOrOneToMany(getForeignKey(right.getTable(), left.getTable()));
   }
 
   @Override
-  public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> manyToMany(
-      Entity<L, L2> left, Entity<R, R2> right, Table<?> relation) {
-    TableField<?, Long> leftKey = getForeignKey(relation, left.getTable());
-    TableField<?, Long> rightKey = getForeignKey(relation, right.getTable());
+  public <L, R, L2 extends Record, R2 extends Record, K> RelationBuilder<T, L, R, K> manyToMany(
+      Entity<L, L2, K> left, Entity<R, R2, K> right, Table<?> relation) {
+    TableField<?, K> leftKey = getForeignKey(relation, left.getTable());
+    TableField<?, K> rightKey = getForeignKey(relation, right.getTable());
     return relation(left, right).manyToMany(leftKey, rightKey);
   }
 
-  private static <L extends Record, R extends Record> TableField<?, Long> getForeignKeySymmetric(
+  @SuppressWarnings("unchecked")
+  private static <L extends Record, R extends Record, K> TableField<?, K> getForeignKeySymmetric(
       Table<L> left, Table<R> right) {
-    TableField<?, Long> leftKey = getOptionalForeignKey(right, left).orElse(null);
-    TableField<?, Long> rightKey =
+    TableField<?, K> leftKey = (TableField<?, K>) getOptionalForeignKey(right, left).orElse(null);
+    TableField<?, K> rightKey =
         leftKey == null
             ? getForeignKey(left, right)
-            : getOptionalForeignKey(left, right).orElse(null);
+            : (TableField<?, K>) getOptionalForeignKey(left, right).orElse(null);
     validate(
         leftKey == null || rightKey == null || leftKey.equals(rightKey),
         "One-to-one relationship between %s and %s is ambiguous, "
@@ -131,12 +133,12 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
    * Used by {@link RelationBuilder} to return completed {@link Relation} prototypes to this
    * builder.
    */
-  LoaderFactoryBuilderImpl<T> addRelation(Relation<?, ?> relation) {
+  LoaderFactoryBuilderImpl<T> addRelation(Relation<?, ?, ?> relation) {
     relations.add(relation);
     return this;
   }
 
-  private void addEntity(Entity<?, ?> newEntity) {
+  private void addEntity(Entity<?, ?, ?> newEntity) {
     boolean primaryKeyIdentifiesUniqueEntity =
         entities.stream()
             .filter(e -> e.getPrimaryKey().equals(newEntity.getPrimaryKey()))
