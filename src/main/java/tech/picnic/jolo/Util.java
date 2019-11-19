@@ -19,15 +19,13 @@ final class Util {
     return getKey(table, table.getPrimaryKey().getFields(), "primary");
   }
 
-  @SuppressWarnings("unchecked")
   static <L extends Record, R extends Record, K> TableField<?, K> getForeignKey(
       Table<L> from, Table<R> into) {
-    return (TableField<?, K>)
-        getOptionalForeignKey(from, into)
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        String.format("Table %s has no foreign key into %s", from, into)));
+    return Util.<L, R, K>getOptionalForeignKey(from, into)
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    String.format("Table %s has no foreign key into %s", from, into)));
   }
 
   static <L extends Record, R extends Record, K> Optional<TableField<?, K>> getOptionalForeignKey(

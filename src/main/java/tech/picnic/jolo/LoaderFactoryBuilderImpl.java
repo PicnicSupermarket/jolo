@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static tech.picnic.jolo.Util.getForeignKey;
-import static tech.picnic.jolo.Util.getOptionalForeignKey;
 import static tech.picnic.jolo.Util.validate;
 
 import java.util.ArrayList;
@@ -112,14 +111,13 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
     return relation(left, right).manyToMany(leftKey, rightKey);
   }
 
-  @SuppressWarnings("unchecked")
   private static <L extends Record, R extends Record, K> TableField<?, K> getForeignKeySymmetric(
       Table<L> left, Table<R> right) {
-    TableField<?, K> leftKey = (TableField<?, K>) getOptionalForeignKey(right, left).orElse(null);
+    TableField<?, K> leftKey = Util.<R, L, K>getOptionalForeignKey(right, left).orElse(null);
     TableField<?, K> rightKey =
         leftKey == null
             ? getForeignKey(left, right)
-            : (TableField<?, K>) getOptionalForeignKey(left, right).orElse(null);
+            : Util.<L, R, K>getOptionalForeignKey(left, right).orElse(null);
     validate(
         leftKey == null || rightKey == null || leftKey.equals(rightKey),
         "One-to-one relationship between %s and %s is ambiguous, "
