@@ -36,8 +36,8 @@ public final class LoaderTest {
   }
 
   private static void runOneToManyTest(Foo fooTable, Bar barTable) {
-    Entity<FooEntity, ?> foo = new Entity<>(fooTable, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(barTable, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(fooTable, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(barTable, BarEntity.class);
     Loader<FooEntity> l =
         LoaderFactory.create(foo)
             .oneToMany(foo, bar)
@@ -74,16 +74,16 @@ public final class LoaderTest {
 
   @Test
   public void testOneToManyWrongWayAround() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     assertThrows(
         IllegalArgumentException.class, () -> LoaderFactory.create(foo).oneToMany(bar, foo));
   }
 
   @Test
   public void testOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .oneToOne(bar, foo)
@@ -107,15 +107,15 @@ public final class LoaderTest {
 
   @Test
   public void testOneToOneAmbiguous() {
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Entity<BazEntity, ?> baz = new Entity<>(BAZ, BazEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<BazEntity, ?, Long> baz = new Entity<>(BAZ, BazEntity.class);
     assertThrows(ValidationException.class, () -> LoaderFactory.create(bar).oneToOne(bar, baz));
   }
 
   @Test
   public void testOneToZeroOrOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<FooEntity> l =
         LoaderFactory.create(foo)
             .oneToZeroOrOne(foo, bar)
@@ -141,8 +141,8 @@ public final class LoaderTest {
 
   @Test
   public void testOptionalOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .optionalOneToOne(bar, foo)
@@ -166,8 +166,8 @@ public final class LoaderTest {
 
   @Test
   public void testEmptyOptionalOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .optionalOneToOne(bar, foo)
@@ -186,8 +186,8 @@ public final class LoaderTest {
 
   @Test
   public void testZeroOrOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .optionalOneToOne(bar, foo)
@@ -204,8 +204,8 @@ public final class LoaderTest {
 
   @Test
   public void testZeroOrOneToMany() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .zeroOrOneToMany(foo, bar)
@@ -230,7 +230,7 @@ public final class LoaderTest {
 
   @Test
   public void testZeroOrOneToManyRecursiveReference() {
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .zeroOrOneToMany(bar, bar)
@@ -250,8 +250,8 @@ public final class LoaderTest {
 
   @Test
   public void testNToOneThrowsIfManyAreFound() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
         LoaderFactory.create(bar)
             .oneToOne(bar, foo)
@@ -274,8 +274,8 @@ public final class LoaderTest {
 
   @Test
   public void testManyToMany() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
     Loader<FooEntity> l =
         LoaderFactory.create(foo)
             .manyToMany(foo, bar, FOOBAR)
@@ -305,7 +305,7 @@ public final class LoaderTest {
 
   @Test
   public void testGetOptional() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<FooEntity, ?, ?> foo = new Entity<>(FOO, FooEntity.class);
     Loader<FooEntity> l = LoaderFactory.create(foo).build().newLoader();
 
     // Initially, it should return empty
@@ -322,15 +322,15 @@ public final class LoaderTest {
 
   @Test
   public void testRelationWithDummyRelationLoader() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
 
     Loader<FooEntity> l =
         LoaderFactory.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
-            .setRelationLoader((record, pairs) -> pairs.add(Relation.Pair.of(1, 1)))
+            .setRelationLoader((record, pairs) -> pairs.add(Relation.Pair.of(1L, 1L)))
             .build()
             .newLoader();
 
@@ -349,8 +349,8 @@ public final class LoaderTest {
 
   @Test
   public void testRelationWithCustomRelationLoader() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
 
     Loader<FooEntity> l =
         LoaderFactory.create(foo)
@@ -393,8 +393,8 @@ public final class LoaderTest {
 
   @Test
   public void testFallbackToForeignKeyRelation() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<FooEntity, ?, Long> foo = new Entity<>(FOO, FooEntity.class);
+    Entity<BarEntity, ?, Long> bar = new Entity<>(BAR, BarEntity.class);
 
     Loader<FooEntity> l =
         LoaderFactory.create(foo)
@@ -434,7 +434,7 @@ public final class LoaderTest {
     assertEquals(fooEntitiesInLoader.get(1).getBarList(), ImmutableList.of());
   }
 
-  private static void customRelationLoader(Record record, Set<Relation.Pair> pairs) {
+  private static void customRelationLoader(Record record, Set<Relation.Pair<Long>> pairs) {
     Long barId = record.get(BAR.ID);
     if (barId == null) {
       return;

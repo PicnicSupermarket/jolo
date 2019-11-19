@@ -20,10 +20,10 @@ import org.jooq.Table;
  *
  * @param <T> The class that is mapped to.
  */
-public final class Entity<T, R extends Record> {
-  private final Map<Long, T> entities = new LinkedHashMap<>();
+public final class Entity<T, R extends Record, K> {
+  private final Map<K, T> entities = new LinkedHashMap<>();
   private final Table<R> table;
-  private final Field<Long> primaryKey;
+  private final Field<K> primaryKey;
   private final Class<T> type;
 
   private Field<?>[] fields;
@@ -32,8 +32,8 @@ public final class Entity<T, R extends Record> {
   /**
    * Creates a mapping from a jOOQ table to the given class.
    *
-   * @param table The table to map. Currently only single-field, long-valued primary keys are
-   *     supported.
+   * @param table The table to map. Currently only single-field, long-or-uuid-valued primary keys
+   *     are supported.
    * @param type The class that the table for this primary key is mapped to.
    */
   public Entity(Table<R> table, Class<T> type) {
@@ -49,12 +49,12 @@ public final class Entity<T, R extends Record> {
    * @param type The class that the table for this primary key is mapped to.
    * @param primaryKey The field to use as a primary key
    */
-  public Entity(Table<R> table, Class<T> type, Field<Long> primaryKey) {
+  public Entity(Table<R> table, Class<T> type, Field<K> primaryKey) {
     this(table, type, primaryKey, table.fields());
   }
 
   /** Copy constructor (for internal use). */
-  private Entity(Table<R> table, Class<T> type, Field<Long> primaryKey, Field<?>[] fields) {
+  private Entity(Table<R> table, Class<T> type, Field<K> primaryKey, Field<?>[] fields) {
     this.table = table;
     this.primaryKey = primaryKey;
     this.type = type;
@@ -70,13 +70,13 @@ public final class Entity<T, R extends Record> {
    * picked}. If it is mapped from a record that contains a (computed) {@code picked} column, then
    * the constructor with the extra argument is used to bring it into Java land.
    */
-  public Entity<T, R> withExtraFields(Field<?>... extraFields) {
+  public Entity<T, R, K> withExtraFields(Field<?>... extraFields) {
     this.fields = concat(stream(this.fields), stream(extraFields)).toArray(Field<?>[]::new);
     return this;
   }
 
   /** Copies this entity, discarding any state. This method is used in a prototype pattern. */
-  public Entity<T, R> copy() {
+  public Entity<T, R, K> copy() {
     return new Entity<>(table, type, primaryKey, fields);
   }
 
@@ -86,7 +86,7 @@ public final class Entity<T, R extends Record> {
   }
 
   /** The primary key that this Entity uses to distinguish records. */
-  public Field<Long> getPrimaryKey() {
+  public Field<K> getPrimaryKey() {
     return primaryKey;
   }
 
@@ -118,7 +118,7 @@ public final class Entity<T, R extends Record> {
       resultFields =
           stream(fields).filter(f -> equalFieldNames(f, record.field(f))).toArray(Field<?>[]::new);
     }
-    Long id = record.get(primaryKey);
+    K id = record.get(primaryKey);
     if (id != null) {
       /*
        * The .into(resultFields) makes sure we don't let jOOQ magically use values from fields
@@ -134,10 +134,11 @@ public final class Entity<T, R extends Record> {
    * Retrieves the object mapped to the primary key with this value.
    *
    * @throws ValidationException if the id is not known.
+   * @param id the id
    */
   @SuppressWarnings("NullAway")
   // XXX: Figure out how to convince NullAway we never return `null` here.
-  public T get(long id) {
+  public T get(K id) {
     T result = entities.get(id);
     validate(result != null, "Unknown id requested from table %s: %s", table, id);
     return result;
@@ -152,7 +153,7 @@ public final class Entity<T, R extends Record> {
    * Returns all objects loaded by this Entity, as a map from primary key values to the
    * corresponding objects.
    */
-  Map<Long, T> getEntityMap() {
+  Map<K, T> getEntityMap() {
     return Collections.unmodifiableMap(entities);
   }
 

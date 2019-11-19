@@ -26,36 +26,36 @@ import org.jooq.Record;
  * @param <L> The Java class that the left-hand side of the relation is mapped to
  * @param <R> The Java class that the right-hand side of the relation is mapped to.
  */
-final class Relation<L, R> {
+final class Relation<L, R, K> {
   enum Arity {
     ZERO_OR_ONE,
     ONE,
     MANY
   }
 
-  private final Set<Pair> pairs = new LinkedHashSet<>();
-  private final Entity<L, ?> left;
-  private final Entity<R, ?> right;
-  private final Field<Long> leftKey;
-  private final Field<Long> rightKey;
+  private final Set<Pair<K>> pairs = new LinkedHashSet<>();
+  private final Entity<L, ?, K> left;
+  private final Entity<R, ?, K> right;
+  private final Field<K> leftKey;
+  private final Field<K> rightKey;
   private final Arity leftArity;
   private final Arity rightArity;
   private final Optional<BiConsumer<L, ?>> leftSetter;
   private final Optional<BiConsumer<R, ?>> rightSetter;
-  private final BiConsumer<Record, Set<Pair>> relationLoader;
+  private final BiConsumer<Record, Set<Pair<K>>> relationLoader;
   private final boolean relationLoaderIsCustom;
 
   @SuppressWarnings("ConstructorLeaksThis")
   Relation(
-      Entity<L, ?> left,
-      Entity<R, ?> right,
-      Field<Long> leftKey,
-      Field<Long> rightKey,
+      Entity<L, ?, K> left,
+      Entity<R, ?, K> right,
+      Field<K> leftKey,
+      Field<K> rightKey,
       Arity leftArity,
       Arity rightArity,
       Optional<BiConsumer<L, ?>> leftSetter,
       Optional<BiConsumer<R, ?>> rightSetter,
-      Optional<BiConsumer<Record, Set<Pair>>> relationLoader) {
+      Optional<BiConsumer<Record, Set<Pair<K>>>> relationLoader) {
     this.left = left;
     this.right = right;
     this.leftKey = leftKey;
@@ -70,10 +70,10 @@ final class Relation<L, R> {
 
   /** Copies this relation, discarding any state. This method is used in a prototype pattern. */
   @SuppressWarnings("unchecked")
-  Relation<L, R> copy(Map<Entity<?, ?>, Entity<?, ?>> newEntities) {
-    Entity<L, ?> newLeft = (Entity<L, ?>) newEntities.get(left);
+  Relation<L, R, K> copy(Map<Entity<?, ?, ?>, Entity<?, ?, ?>> newEntities) {
+    Entity<L, ?, K> newLeft = (Entity<L, ?, K>) newEntities.get(left);
     assert newLeft != null : "Attempt to create copy without new left entity";
-    Entity<R, ?> newRight = (Entity<R, ?>) newEntities.get(right);
+    Entity<R, ?, K> newRight = (Entity<R, ?, K>) newEntities.get(right);
     assert newRight != null : "Attempt to create copy without new right entity";
     return new Relation<>(
         newLeft,
@@ -131,26 +131,26 @@ final class Relation<L, R> {
     }
   }
 
-  private static <T, U> void linkOne(
-      Map<Long, T> entities, BiConsumer<T, U> setter, Map<Long, U> successors) {
+  private static <T, U, K> void linkOne(
+      Map<K, T> entities, BiConsumer<T, U> setter, Map<K, U> successors) {
     entities.forEach((id, e) -> setter.accept(e, successors.get(id)));
   }
 
-  private static <T, U> void linkOptional(
-      Map<Long, T> entities, BiConsumer<T, Optional<U>> setter, Map<Long, U> successors) {
+  private static <T, U, K> void linkOptional(
+      Map<K, T> entities, BiConsumer<T, Optional<U>> setter, Map<K, U> successors) {
     entities.forEach((id, e) -> setter.accept(e, Optional.ofNullable(successors.get(id))));
   }
 
-  private static <T, U> void linkMany(
-      Map<Long, T> entities, BiConsumer<T, Collection<U>> setter, Map<Long, List<U>> successors) {
+  private static <T, U, K> void linkMany(
+      Map<K, T> entities, BiConsumer<T, Collection<U>> setter, Map<K, List<U>> successors) {
     entities.forEach((id, e) -> setter.accept(e, successors.getOrDefault(id, emptyList())));
   }
 
-  private Map<Long, List<L>> getPreSets() {
+  private Map<K, List<L>> getPreSets() {
     return pairs.stream().collect(toMultiset(Pair::getRightId, p -> left.get(p.getLeftId())));
   }
 
-  private Map<Long, List<R>> getPostSets() {
+  private Map<K, List<R>> getPostSets() {
     return pairs.stream().collect(toMultiset(Pair::getLeftId, p -> right.get(p.getRightId())));
   }
 
@@ -159,12 +159,12 @@ final class Relation<L, R> {
     return groupingBy(keyFunction, mapping(valueFunction, toList()));
   }
 
-  private Map<Long, L> getPredecessors() {
+  private Map<K, L> getPredecessors() {
     return pairs.stream()
         .collect(toMap(Pair::getRightId, p -> left.get(p.getLeftId()), this::unexpectedPair));
   }
 
-  private Map<Long, R> getSuccessors() {
+  private Map<K, R> getSuccessors() {
     return pairs.stream()
         .collect(toMap(Pair::getLeftId, p -> right.get(p.getRightId()), this::unexpectedPair));
   }
@@ -182,32 +182,32 @@ final class Relation<L, R> {
    * key, or two foreign keys in case of a many-to-may relation), and if both can be found, the two
    * values are considered to represent a pair that is part of the relation.
    */
-  private void foreignKeyRelationLoader(Record record, Set<Relation.Pair> sink) {
-    Long leftId = record.get(leftKey);
-    Long rightId = record.get(rightKey);
+  private void foreignKeyRelationLoader(Record record, Set<Pair<K>> sink) {
+    K leftId = record.get(leftKey);
+    K rightId = record.get(rightKey);
     if (leftId != null && rightId != null) {
       sink.add(Relation.Pair.of(leftId, rightId));
     }
   }
 
-  static final class Pair {
-    private final long leftId;
-    private final long rightId;
+  static final class Pair<K> {
+    private final K leftId;
+    private final K rightId;
 
-    Pair(long leftId, long rightId) {
+    Pair(K leftId, K rightId) {
       this.leftId = leftId;
       this.rightId = rightId;
     }
 
-    static Pair of(long leftId, long rightId) {
-      return new Pair(leftId, rightId);
+    static <K> Pair<K> of(K leftId, K rightId) {
+      return new Pair<>(leftId, rightId);
     }
 
-    long getLeftId() {
+    K getLeftId() {
       return leftId;
     }
 
-    long getRightId() {
+    K getRightId() {
       return rightId;
     }
 
@@ -219,7 +219,7 @@ final class Relation<L, R> {
       if (o == null || getClass() != o.getClass()) {
         return false;
       }
-      Pair pair = (Pair) o;
+      Pair<?> pair = (Pair<?>) o;
       return leftId == pair.leftId && rightId == pair.rightId;
     }
 
