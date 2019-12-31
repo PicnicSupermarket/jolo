@@ -26,7 +26,7 @@ import org.jooq.Record;
  * @param <L> The Java class that the left-hand side of the relation is mapped to
  * @param <R> The Java class that the right-hand side of the relation is mapped to.
  */
-final class Relation<L, R> {
+public final class Relation<L, R> {
   enum Arity {
     ZERO_OR_ONE,
     ONE,
@@ -190,7 +190,7 @@ final class Relation<L, R> {
     }
   }
 
-  static final class Pair {
+  public static final class Pair {
     private final long leftId;
     private final long rightId;
 
@@ -199,7 +199,7 @@ final class Relation<L, R> {
       this.rightId = rightId;
     }
 
-    static Pair of(long leftId, long rightId) {
+    public static Pair of(long leftId, long rightId) {
       return new Pair(leftId, rightId);
     }
 
