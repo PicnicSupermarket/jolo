@@ -66,7 +66,7 @@ public final class Loader<T> implements RecordHandler<Record> {
     return get().stream();
   }
 
-  /** Returns all objects loaded by this loader. */
+  /** Collects and then returns all objects loaded by this loader. */
   public <R, A> R collect(Collector<? super T, A, R> collector) {
     return stream().collect(collector);
   }
