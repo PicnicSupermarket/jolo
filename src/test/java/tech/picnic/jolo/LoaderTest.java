@@ -1,5 +1,6 @@
 package tech.picnic.jolo;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tech.picnic.jolo.TestUtil.createRecord;
@@ -245,7 +246,7 @@ public final class LoaderTest {
     expectedBar1.setOtherBar(Optional.of(expectedBar2));
     expectedBar2.setOtherBar(Optional.of(expectedBar2));
 
-    assertEquals(ImmutableList.of(expectedBar1, expectedBar2), l.getList());
+    assertEquals(ImmutableList.of(expectedBar1, expectedBar2), l.collect(toImmutableList()));
   }
 
   @Test
