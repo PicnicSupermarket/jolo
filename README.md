@@ -164,7 +164,6 @@ deleted than added.)
 [jooq]: https://www.jooq.org
 [maven-central-badge]: https://img.shields.io/maven-central/v/tech.picnic.jolo/jolo.svg
 [maven-central-browse]: https://repo1.maven.org/maven2/tech/picnic/jolo/
-[maven-central-search]: https://search.maven.org
 [new-issue]: https://github.com/PicnicSupermarket/jolo/issues/new
 [new-pr]: https://github.com/PicnicSupermarket/jolo/compare
 [sonarcloud-badge-bugs]: https://sonarcloud.io/api/project_badges/measure?project=tech.picnic.jolo%3Ajolo&metric=bugs
