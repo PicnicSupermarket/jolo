@@ -9,7 +9,7 @@ import org.immutables.value.Value;
     typeAbstract = "*Interface",
     typeImmutable = "*",
     visibility = Value.Style.ImplementationVisibility.PUBLIC)
-interface PairInterface {
+interface IdPairInterface {
   /** The left-hand ID of the relation. */
   long getLeftId();
 

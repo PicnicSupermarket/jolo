@@ -32,7 +32,7 @@ final class Relation<L, R> {
     MANY
   }
 
-  private final Set<Pair> pairs = new LinkedHashSet<>();
+  private final Set<IdPair> pairs = new LinkedHashSet<>();
   private final Entity<L, ?> left;
   private final Entity<R, ?> right;
   private final Field<Long> leftKey;
@@ -41,7 +41,7 @@ final class Relation<L, R> {
   private final Arity rightArity;
   private final Optional<BiConsumer<L, ?>> leftSetter;
   private final Optional<BiConsumer<R, ?>> rightSetter;
-  private final BiConsumer<Record, Set<Pair>> relationLoader;
+  private final BiConsumer<Record, Set<IdPair>> relationLoader;
   private final boolean relationLoaderIsCustom;
 
   @SuppressWarnings("ConstructorLeaksThis")
@@ -54,7 +54,7 @@ final class Relation<L, R> {
       Arity rightArity,
       Optional<BiConsumer<L, ?>> leftSetter,
       Optional<BiConsumer<R, ?>> rightSetter,
-      Optional<BiConsumer<Record, Set<Pair>>> relationLoader) {
+      Optional<BiConsumer<Record, Set<IdPair>>> relationLoader) {
     this.left = left;
     this.right = right;
     this.leftKey = leftKey;
@@ -146,11 +146,11 @@ final class Relation<L, R> {
   }
 
   private Map<Long, List<L>> getPreSets() {
-    return pairs.stream().collect(toMultiset(Pair::getRightId, p -> left.get(p.getLeftId())));
+    return pairs.stream().collect(toMultiset(IdPair::getRightId, p -> left.get(p.getLeftId())));
   }
 
   private Map<Long, List<R>> getPostSets() {
-    return pairs.stream().collect(toMultiset(Pair::getLeftId, p -> right.get(p.getRightId())));
+    return pairs.stream().collect(toMultiset(IdPair::getLeftId, p -> right.get(p.getRightId())));
   }
 
   private static <T, K, V> Collector<T, ?, Map<K, List<V>>> toMultiset(
@@ -160,12 +160,12 @@ final class Relation<L, R> {
 
   private Map<Long, L> getPredecessors() {
     return pairs.stream()
-        .collect(toMap(Pair::getRightId, p -> left.get(p.getLeftId()), this::unexpectedPair));
+        .collect(toMap(IdPair::getRightId, p -> left.get(p.getLeftId()), this::unexpectedPair));
   }
 
   private Map<Long, R> getSuccessors() {
     return pairs.stream()
-        .collect(toMap(Pair::getLeftId, p -> right.get(p.getRightId()), this::unexpectedPair));
+        .collect(toMap(IdPair::getLeftId, p -> right.get(p.getRightId()), this::unexpectedPair));
   }
 
   private <T> T unexpectedPair(T oldValue, T newValue) {
@@ -181,11 +181,11 @@ final class Relation<L, R> {
    * key, or two foreign keys in case of a many-to-may relation), and if both can be found, the two
    * values are considered to represent a pair that is part of the relation.
    */
-  private void foreignKeyRelationLoader(Record record, Set<Pair> sink) {
+  private void foreignKeyRelationLoader(Record record, Set<IdPair> sink) {
     Long leftId = record.get(leftKey);
     Long rightId = record.get(rightKey);
     if (leftId != null && rightId != null) {
-      sink.add(Pair.of(leftId, rightId));
+      sink.add(IdPair.of(leftId, rightId));
     }
   }
 }
