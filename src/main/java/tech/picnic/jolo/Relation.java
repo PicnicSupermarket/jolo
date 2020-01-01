@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -26,7 +25,7 @@ import org.jooq.Record;
  * @param <L> The Java class that the left-hand side of the relation is mapped to
  * @param <R> The Java class that the right-hand side of the relation is mapped to.
  */
-public final class Relation<L, R> {
+final class Relation<L, R> {
   enum Arity {
     ZERO_OR_ONE,
     ONE,
@@ -182,50 +181,11 @@ public final class Relation<L, R> {
    * key, or two foreign keys in case of a many-to-may relation), and if both can be found, the two
    * values are considered to represent a pair that is part of the relation.
    */
-  private void foreignKeyRelationLoader(Record record, Set<Relation.Pair> sink) {
+  private void foreignKeyRelationLoader(Record record, Set<Pair> sink) {
     Long leftId = record.get(leftKey);
     Long rightId = record.get(rightKey);
     if (leftId != null && rightId != null) {
-      sink.add(Relation.Pair.of(leftId, rightId));
-    }
-  }
-
-  public static final class Pair {
-    private final long leftId;
-    private final long rightId;
-
-    Pair(long leftId, long rightId) {
-      this.leftId = leftId;
-      this.rightId = rightId;
-    }
-
-    public static Pair of(long leftId, long rightId) {
-      return new Pair(leftId, rightId);
-    }
-
-    long getLeftId() {
-      return leftId;
-    }
-
-    long getRightId() {
-      return rightId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      Pair pair = (Pair) o;
-      return leftId == pair.leftId && rightId == pair.rightId;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(leftId, rightId);
+      sink.add(Pair.of(leftId, rightId));
     }
   }
 }
