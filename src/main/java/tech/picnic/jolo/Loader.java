@@ -73,7 +73,7 @@ public final class Loader<T> implements RecordHandler<Record> {
 
   /** Returns all objects loaded by this loader. */
   public List<T> getList() {
-    return stream().collect(Collectors.toList());
+    return collect(Collectors.toList());
   }
 
   /**
@@ -82,7 +82,7 @@ public final class Loader<T> implements RecordHandler<Record> {
    * correct result.
    */
   public Set<T> getSet() {
-    return stream().collect(Collectors.toSet());
+    return collect(Collectors.toSet());
   }
 
   /**
