@@ -330,7 +330,7 @@ public final class LoaderTest {
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
-            .setRelationLoader((record, pairs) -> pairs.add(Relation.Pair.of(1, 1)))
+            .setRelationLoader((record, pairs) -> pairs.add(IdPair.of(1, 1)))
             .build()
             .newLoader();
 
@@ -434,7 +434,7 @@ public final class LoaderTest {
     assertEquals(fooEntitiesInLoader.get(1).getBarList(), ImmutableList.of());
   }
 
-  private static void customRelationLoader(Record record, Set<Relation.Pair> pairs) {
+  private static void customRelationLoader(Record record, Set<IdPair> pairs) {
     Long barId = record.get(BAR.ID);
     if (barId == null) {
       return;
@@ -443,6 +443,6 @@ public final class LoaderTest {
     if (fooIds == null) {
       return;
     }
-    Stream.of(fooIds).map(fooId -> Relation.Pair.of(fooId, barId)).forEach(pairs::add);
+    Stream.of(fooIds).map(fooId -> IdPair.of(fooId, barId)).forEach(pairs::add);
   }
 }
