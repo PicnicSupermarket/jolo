@@ -10,7 +10,7 @@
 
     <groupId>tech.picnic.jolo</groupId>
     <artifactId>jolo</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <name>Picnic :: Jolo</name>
     <description>A relational mapper for jOOQ.</description>
@@ -59,7 +59,7 @@
     <scm>
         <developerConnection>scm:git:git@github.com:PicnicSupermarket/jolo.git</developerConnection>
         <url>https://github.com/PicnicSupermarket/jolo</url>
-        <tag>v0.0.2</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>Github</system>
