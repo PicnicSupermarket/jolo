@@ -192,7 +192,7 @@
                         code, so we must take care to exclude it during the
                         Javadoc generation process. Flag this issue with jOOQ
                         to get it resolved. -->
-                        <sourcepath>src/main/java</sourcepath>
+                        <sourcepath>${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations</sourcepath>
                     </configuration>
                 </plugin>
                 <plugin>
