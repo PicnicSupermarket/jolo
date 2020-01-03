@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jooq.Record;
@@ -65,9 +66,14 @@ public final class Loader<T> implements RecordHandler<Record> {
     return get().stream();
   }
 
+  /** Collects and then returns all objects loaded by this loader. */
+  public <R, A> R collect(Collector<? super T, A, R> collector) {
+    return stream().collect(collector);
+  }
+
   /** Returns all objects loaded by this loader. */
   public List<T> getList() {
-    return stream().collect(Collectors.toList());
+    return collect(Collectors.toList());
   }
 
   /**
@@ -76,7 +82,7 @@ public final class Loader<T> implements RecordHandler<Record> {
    * correct result.
    */
   public Set<T> getSet() {
-    return stream().collect(Collectors.toSet());
+    return collect(Collectors.toSet());
   }
 
   /**
