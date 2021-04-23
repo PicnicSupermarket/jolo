@@ -37,6 +37,9 @@ import org.jooq.RecordHandler;
  * initialisation a number of validations are performed. Initialising at application start-up
  * therefore makes it possible to detect any misconfiguration before the query is first executed.
  */
+// XXX: Move this suppression to the `entities` field once
+// https://github.com/google/error-prone/pull/2301 is released.
+@SuppressWarnings("ImmutableMemberCollection" /* This library does not use Guava. */)
 public final class Loader<T> implements RecordHandler<Record> {
   private final Entity<T, ?> mainEntity;
   private final Set<Entity<?, ?>> entities;
