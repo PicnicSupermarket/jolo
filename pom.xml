@@ -5,7 +5,7 @@
     <parent>
         <groupId>tech.picnic</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.picnic.jolo</groupId>
@@ -58,8 +58,8 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:PicnicSupermarket/jolo.git</developerConnection>
-        <url>https://github.com/PicnicSupermarket/jolo</url>
         <tag>HEAD</tag>
+        <url>https://github.com/PicnicSupermarket/jolo</url>
     </scm>
     <issueManagement>
         <system>Github</system>
@@ -152,24 +152,24 @@
                     <configuration>
                         <annotationProcessorPaths>
                             <path>
+                                <groupId>com.google.guava</groupId>
+                                <artifactId>guava</artifactId>
+                                <version>31.1-jre</version>
+                            </path>
+                            <path>
                                 <groupId>org.immutables</groupId>
                                 <artifactId>value-processor</artifactId>
                                 <version>${version.immutables}</version>
-                            </path>
-                            <path>
-                                <groupId>com.google.guava</groupId>
-                                <artifactId>guava</artifactId>
-                                <version>28.2-jre</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
                     <executions>
                         <execution>
                             <id>default-testCompile</id>
-                            <phase>test-compile</phase>
                             <goals>
                                 <goal>testCompile</goal>
                             </goals>
+                            <phase>test-compile</phase>
                             <configuration>
                                 <compilerArgs>
                                     <!-- XXX: We disable `html` checks to work
@@ -216,21 +216,21 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <!-- XXX: We require this plugin execution only because there
-                is no way to tell the `jooq-codegen-maven` that it generates
-                _test_ code. File an issue with jOOQ to discuss improving this.
-                (See also the `maven-javadoc-plugin` and `maven-source-plugin`
+            <plugin><!--
+                XXX: We require this plugin execution only because there is no
+                way to tell the `jooq-codegen-maven` that it generates _test_
+                code. File an issue with jOOQ to discuss improving this. (See
+                also the `maven-javadoc-plugin` and `maven-source-plugin`
                 plugin customizations above.) -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>add-test-sources</id>
-                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
                         </goals>
+                        <phase>generate-test-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-test-sources/jooq</source>
@@ -242,14 +242,6 @@
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <generator>
                         <database>
@@ -277,6 +269,14 @@
                         </target>
                     </generator>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
