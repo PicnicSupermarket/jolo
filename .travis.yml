@@ -2,13 +2,13 @@ language: java
 matrix:
   include:
     - jdk: openjdk8
+      script: ./mvnw install
+    - jdk: openjdk11
       # This is the primary target platform. In this build we track test
       # coverage and perform a SonarQube analysis.
       script:
         - ./mvnw install
         - ./mvnw jacoco:prepare-agent surefire:test jacoco:report sonar:sonar
-    - jdk: openjdk11
-      script: ./mvnw install
 addons:
   sonarcloud:
     organization: picnic-technologies
