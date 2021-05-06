@@ -5,7 +5,7 @@
     <parent>
         <groupId>tech.picnic</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3</version>
     </parent>
 
     <groupId>tech.picnic.jolo</groupId>
@@ -263,7 +263,7 @@
                             <forcedTypes>
                                 <forcedType>
                                     <userType>Long[]</userType>
-                                    <expression>.*\.RELATEDFOOIDS</expression>
+                                    <includeExpression>.*\.RELATEDFOOIDS</includeExpression>
                                     <converter>org.jooq.Converter.ofNullable(Object[].class, Long[].class, i -&gt; (Long[])i, i -&gt; i)</converter>
                                 </forcedType>
                             </forcedTypes>
