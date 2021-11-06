@@ -51,7 +51,7 @@ final class Util {
     if (right == null) {
       return false;
     }
-    return left.getQualifiedName().equals(right.getQualifiedName());
+    return left.equals(right);
   }
 
   @FormatMethod

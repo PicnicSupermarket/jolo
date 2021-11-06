@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -27,7 +28,7 @@ public final class RelationBuilder<T, L, R> {
   @Nullable private Arity rightArity;
   @Nullable private BiConsumer<L, ?> leftSetter;
   @Nullable private BiConsumer<R, ?> rightSetter;
-  private Optional<BiConsumer<Record, Set<IdPair>>> relationLoader = Optional.empty();
+  private Optional<Function<Record, Set<IdPair>>> relationLoader = Optional.empty();
 
   RelationBuilder(LoaderFactoryBuilderImpl<T> builder, Entity<L, ?> left, Entity<R, ?> right) {
     this.builder = builder;
@@ -48,6 +49,14 @@ public final class RelationBuilder<T, L, R> {
     validate(
         leftSetter != null || rightSetter != null,
         "Relationship between %s and %s has no setters",
+        left,
+        right);
+    // Prevent against obviously dangerous setter equivalence.
+    // Note that function equivalence is generally undecidable, so this check is not exhaustive and
+    // should not be relied upon.
+    validate(
+        leftSetter != rightSetter,
+        "Left and right setter of relationship between %s and %s are the same",
         left,
         right);
     assert leftKey != null : "Left key was not set";
@@ -155,8 +164,7 @@ public final class RelationBuilder<T, L, R> {
   }
 
   /** Specifies a function to programmatically identify relation pairs in loaded records. */
-  public RelationBuilder<T, L, R> setRelationLoader(
-      BiConsumer<Record, Set<IdPair>> relationLoader) {
+  public RelationBuilder<T, L, R> setRelationLoader(Function<Record, Set<IdPair>> relationLoader) {
     this.relationLoader = Optional.of(relationLoader);
     return this;
   }

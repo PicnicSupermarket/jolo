@@ -5,23 +5,21 @@ import static java.util.stream.Stream.concat;
 import static tech.picnic.jolo.Util.equalFieldNames;
 import static tech.picnic.jolo.Util.validate;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
 
 /**
- * Represents a mapping from a jOOQ table to a class. This class is used to store entities that have
- * been loaded from a data set.
+ * Represents a mapping from a {@link Table table} to a {@link Class class}. This class is used to
+ * load and instantiate objects from a data set.
  *
  * @param <T> The class that is mapped to.
  */
 public final class Entity<T, R extends Record> {
-  private final Map<Long, T> entities = new LinkedHashMap<>();
   private final Table<R> table;
   private final Field<Long> primaryKey;
   private final Class<T> type;
@@ -30,7 +28,7 @@ public final class Entity<T, R extends Record> {
   @Nullable private Field<?>[] resultFields;
 
   /**
-   * Creates a mapping from a jOOQ table to the given class.
+   * Creates a mapping from a {@link Table table} to the given {@link Class class}.
    *
    * @param table The table to map. Currently only single-field, long-valued primary keys are
    *     supported.
@@ -41,9 +39,10 @@ public final class Entity<T, R extends Record> {
   }
 
   /**
-   * Creates a mapping from a jOOQ table to the given class, using the given field as primary key.
-   * Use this constructor when for instance constructing ad-hoc entities from a select query (as
-   * opposed to entities that correspond directly to a table in the database schema).
+   * Creates a mapping from a {@link Table table} to the given {@link Class class}, using the given
+   * field as primary key. Use this constructor when for instance constructing ad-hoc entities from
+   * a select query (as opposed to entities that correspond directly to a table in the database
+   * schema).
    *
    * @param table The table to map.
    * @param type The class that the table for this primary key is mapped to.
@@ -61,6 +60,31 @@ public final class Entity<T, R extends Record> {
     this.fields = fields;
   }
 
+  @Override
+  public boolean equals(@Nullable Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Entity<?, ?> entity = (Entity<?, ?>) o;
+    return Objects.equals(table, entity.table)
+        && Objects.equals(primaryKey, entity.primaryKey)
+        && Objects.equals(type, entity.type)
+        && Arrays.equals(fields, entity.fields);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(table, primaryKey, type, Arrays.hashCode(fields));
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Entity<%s, %s>", type.getSimpleName(), primaryKey);
+  }
+
   /**
    * Add extra fields outside the table specified in the constructor that will be passed to the
    * constructor or factory method for each row. This can be used to add, e.g., computed fields.
@@ -71,7 +95,7 @@ public final class Entity<T, R extends Record> {
    * the constructor with the extra argument is used to bring it into Java land.
    */
   public Entity<T, R> withExtraFields(Field<?>... extraFields) {
-    this.fields = concat(stream(this.fields), stream(extraFields)).toArray(Field<?>[]::new);
+    fields = concat(stream(fields), stream(extraFields)).toArray(Field<?>[]::new);
     return this;
   }
 
@@ -85,21 +109,39 @@ public final class Entity<T, R extends Record> {
     return table;
   }
 
-  /** The primary key that this Entity uses to distinguish records. */
+  /** The primary key that this entity uses to distinguish records. */
   public Field<Long> getPrimaryKey() {
     return primaryKey;
   }
 
+  /** The given record's ID, corresponding to this entity. */
+  Optional<Long> getId(Record record) {
+    check(record);
+    return Optional.ofNullable(record.get(primaryKey));
+  }
+
+  /** Loads an object of type {@code T} from the given record. */
+  T load(Record record) {
+    check(record);
+    /*
+     * The .into(resultFields) makes sure we don't let jOOQ magically use values from fields
+     * not included in `this.fields`. E.g., if `this.fields = [FOO.ID, FOO.X]` and the
+     * record contains FOO.ID=1 and BAR.X=1, then without this measure, BAR.X would be used
+     * instead of FOO.X.
+     */
+    return record.into(resultFields).into(type);
+  }
+
   /**
-   * Attempts to load an object of type {@code T} from the given record. If the {@link
-   * #getPrimaryKey() primary key} is not present in the record, no object is loaded. If the primary
-   * key is found in this record, and an object was already loaded for the same key, then the
-   * first-loaded object for this key is used.
+   * Check that the given record contains all expected fields and sets them.
+   *
+   * @implNote For performance reasons, this check is only performed for the first loaded record and
+   *     is a no-op otherwise.
    */
-  public void load(Record record) {
+  private void check(Record record) {
     if (resultFields == null) {
       /*
-       * jOOQ does not give us a heads up when it loads the first record, so we manually
+       * jOOQ does not give us a heads-up when it loads the first record, so we manually
        * detect when the first record is loaded and perform some extra checks in that case.
        * Most importantly, we check that the primary key is actually present, but we also
        * figure out which of the expected fields are actually present in the record. If we do
@@ -112,52 +154,11 @@ public final class Entity<T, R extends Record> {
        * we will always retrieve records with the same set of columns.
        */
       validate(
-          equalFieldNames(primaryKey, record.field(primaryKey)),
+          primaryKey.equals(record.field(primaryKey)),
           "Primary key column %s not found in result record",
           primaryKey);
       resultFields =
           stream(fields).filter(f -> equalFieldNames(f, record.field(f))).toArray(Field<?>[]::new);
     }
-    Long id = record.get(primaryKey);
-    if (id != null) {
-      /*
-       * The .into(resultFields) makes sure we don't let jOOQ magically use values from fields
-       * not included in `this.fields`. E.g., if `this.fields = [FOO.ID, FOO.X]` and the
-       * record contains FOO.ID=1 and BAR.X=1, then without this measure, BAR.X would be used
-       * instead of FOO.X.
-       */
-      entities.computeIfAbsent(id, x -> record.into(resultFields).into(type));
-    }
-  }
-
-  /**
-   * Retrieves the object mapped to the primary key with this value.
-   *
-   * @throws ValidationException if the id is not known.
-   */
-  @SuppressWarnings("NullAway")
-  // XXX: Figure out how to convince NullAway we never return `null` here.
-  public T get(long id) {
-    T result = entities.get(id);
-    validate(result != null, "Unknown id requested from table %s: %s", table, id);
-    return result;
-  }
-
-  /** Returns all objects loaded by this Entity. */
-  public Collection<T> getEntities() {
-    return Collections.unmodifiableCollection(entities.values());
-  }
-
-  /**
-   * Returns all objects loaded by this Entity, as a map from primary key values to the
-   * corresponding objects.
-   */
-  Map<Long, T> getEntityMap() {
-    return Collections.unmodifiableMap(entities);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Entity<%s, %s>", type.getSimpleName(), primaryKey);
   }
 }
