@@ -20,7 +20,7 @@ import org.jooq.Record;
 
 /**
  * Represents a relation between two {@link Entity entities}. This class is used to extract links
- * betweens a data set's rows and set their corresponding objects' references.
+ * between a data set's rows and set their corresponding objects' references.
  *
  * @param <L> The Java class that the left-hand side of the relation is mapped to.
  * @param <R> The Java class that the right-hand side of the relation is mapped to.
