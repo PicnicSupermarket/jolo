@@ -2,7 +2,6 @@ package tech.picnic.jolo;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Stream.concat;
-import static tech.picnic.jolo.Util.equalFieldNames;
 import static tech.picnic.jolo.Util.validate;
 
 import java.util.Arrays;
@@ -95,7 +94,9 @@ public final class Entity<T, R extends Record> {
    * the constructor with the extra argument is used to bring it into Java land.
    */
   public Entity<T, R> withExtraFields(Field<?>... extraFields) {
-    fields = concat(stream(fields), stream(extraFields)).toArray(Field<?>[]::new);
+    fields =
+        concat(stream(fields), stream(extraFields).filter(Objects::nonNull))
+            .toArray(Field<?>[]::new);
     return this;
   }
 
@@ -129,7 +130,9 @@ public final class Entity<T, R extends Record> {
      * record contains FOO.ID=1 and BAR.X=1, then without this measure, BAR.X would be used
      * instead of FOO.X.
      */
-    return record.into(resultFields).into(type);
+    T result = record.into(resultFields).into(type);
+    Objects.requireNonNull(result);
+    return result;
   }
 
   /**
@@ -157,8 +160,7 @@ public final class Entity<T, R extends Record> {
           primaryKey.equals(record.field(primaryKey)),
           "Primary key column %s not found in result record",
           primaryKey);
-      resultFields =
-          stream(fields).filter(f -> equalFieldNames(f, record.field(f))).toArray(Field<?>[]::new);
+      resultFields = stream(fields).filter(f -> f.equals(record.field(f))).toArray(Field<?>[]::new);
     }
   }
 }

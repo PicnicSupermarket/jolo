@@ -44,16 +44,6 @@ final class Util {
     return Optional.of(getKey(from, keys.get(0).getFields(), "foreign"));
   }
 
-  static boolean equalFieldNames(@Nullable Field<?> left, @Nullable Field<?> right) {
-    if (left == null) {
-      return right == null;
-    }
-    if (right == null) {
-      return false;
-    }
-    return left.equals(right);
-  }
-
   @FormatMethod
   static void validate(boolean condition, String message, @Nullable Object... args) {
     if (!condition) {
