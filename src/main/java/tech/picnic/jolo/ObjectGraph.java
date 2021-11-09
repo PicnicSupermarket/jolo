@@ -39,7 +39,6 @@ final class ObjectGraph {
    * same entity and with the same ID already exists, the given object is ignored.
    */
   <E> void add(Entity<? extends E, ?> entity, long id, E object) {
-    requireNonNull(object);
     if (!entityAndIdToObject.contains(entity, id)) {
       entityAndIdToObject.put(entity, id, object);
     }
