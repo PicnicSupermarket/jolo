@@ -23,7 +23,7 @@ public final class Entity<T, R extends Record> {
   private final Field<Long> primaryKey;
   private final Class<T> type;
 
-  private Field<?>[] fields;
+  private final Field<?>[] fields;
   @Nullable private Field<?>[] resultFields;
 
   /**
@@ -92,17 +92,13 @@ public final class Entity<T, R extends Record> {
    * line. The corresponding class has one constructor without, and one with an argument {@code int
    * picked}. If it is mapped from a record that contains a (computed) {@code picked} column, then
    * the constructor with the extra argument is used to bring it into Java land.
+   *
+   * @apiNote This method returns a new object.
    */
   public Entity<T, R> withExtraFields(Field<?>... extraFields) {
-    fields =
-        concat(stream(fields), stream(extraFields).filter(Objects::nonNull))
-            .toArray(Field<?>[]::new);
-    return this;
-  }
-
-  /** Copies this entity, discarding any state. This method is used in a prototype pattern. */
-  public Entity<T, R> copy() {
-    return new Entity<>(table, type, primaryKey, fields);
+      Field<?>[] extendedFields = concat(stream(fields), stream(extraFields).filter(Objects::nonNull))
+              .toArray(Field<?>[]::new);
+      return new Entity<>(table, type, primaryKey, extendedFields);
   }
 
   /** The table that is mapped by this entity. */
