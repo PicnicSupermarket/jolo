@@ -69,11 +69,4 @@ public final class EntityTest {
     Record record = createRecord(ImmutableMap.of(bar.ID, 1L, bar.FOO_, 1));
     assertThrows(ValidationException.class, () -> aEntity.load(record));
   }
-
-  @Test
-  public void testCopy() {
-    Entity<FooEntity, FooRecord> aEntity = new Entity<>(FOO, FooEntity.class);
-    aEntity.load(new FooRecord(1L, 1, new Long[0]));
-    assertEquals(aEntity, aEntity.copy());
-  }
 }

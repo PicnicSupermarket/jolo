@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -112,25 +111,6 @@ final class Relation<L, R> {
         leftKey.getName(),
         right.getTable().getName(),
         rightKey.getName());
-  }
-
-  /** Copies this relation. This method is used in a prototype pattern. */
-  @SuppressWarnings("unchecked")
-  Relation<L, R> copy(Map<Entity<?, ?>, Entity<?, ?>> newEntities) {
-    Entity<L, ?> newLeft = (Entity<L, ?>) newEntities.get(left);
-    assert newLeft != null : "Attempt to create copy without new left entity";
-    Entity<R, ?> newRight = (Entity<R, ?>) newEntities.get(right);
-    assert newRight != null : "Attempt to create copy without new right entity";
-    return new Relation<>(
-        newLeft,
-        newRight,
-        leftKey,
-        rightKey,
-        leftArity,
-        rightArity,
-        leftSetter,
-        rightSetter,
-        relationLoaderIsCustom ? Optional.of(relationLoader) : Optional.empty());
   }
 
   @SuppressWarnings("NoFunctionalReturnType")

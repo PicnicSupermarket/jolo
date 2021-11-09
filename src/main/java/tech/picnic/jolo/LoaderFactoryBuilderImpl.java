@@ -1,9 +1,5 @@
 package tech.picnic.jolo;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static tech.picnic.jolo.Util.getForeignKey;
 import static tech.picnic.jolo.Util.getOptionalForeignKey;
 import static tech.picnic.jolo.Util.validate;
@@ -11,7 +7,6 @@ import static tech.picnic.jolo.Util.validate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -38,23 +33,14 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
 
   /**
    * Creates a new {@link Loader} with the entities and relations specified in this builder. The
-   * resulting loader can be used as a jOOQ record handler.
+   * resulting loader can be used as a {@link Record record} {@link java.util.stream.Collector
+   * collector}.
    *
    * @see Loader
    */
   @Override
   public Loader<T> newLoader() {
-    // We use a prototype pattern to create new entities / relations that keep state about the
-    // deserialisation process, by calling Entity#copy and Relation#copy.
-    Map<Entity<?, ?>, Entity<?, ?>> newEntities =
-        entities.stream().collect(toMap(identity(), Entity::copy));
-    @SuppressWarnings("unchecked")
-    Entity<T, ?> mainEntity = (Entity<T, ?>) newEntities.get(entity);
-    assert mainEntity != null : "Main entity was not copied";
-    return new Loader<>(
-        mainEntity,
-        entities.stream().map(newEntities::get).collect(toSet()),
-        relations.stream().map(r -> r.copy(newEntities)).collect(toList()));
+    return new Loader<>(entity, entities, relations);
   }
 
   /**
@@ -129,8 +115,7 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
   }
 
   /**
-   * Used by {@link RelationBuilder} to return completed {@link Relation} prototypes to this
-   * builder.
+   * Used by {@link RelationBuilder} to return completed {@link Relation relations} to this builder.
    */
   LoaderFactoryBuilderImpl<T> addRelation(Relation<?, ?> relation) {
     relations.add(relation);
