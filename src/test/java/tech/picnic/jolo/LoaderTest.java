@@ -551,7 +551,7 @@ public final class LoaderTest {
   }
 
   @Test
-  public void testCombiner() {
+  public void testRightFoldingCombiner() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<FooEntity> l =
@@ -565,9 +565,7 @@ public final class LoaderTest {
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
     BinaryOperator<ObjectGraph> combiner = l.combiner();
 
-    ObjectGraph first = supplier.get();
-    accumulator.accept(
-        first,
+    Record firstRecord =
         createRecord(
             ImmutableMap.<Field<?>, Object>builder()
                 .put(FOO.ID, 1L)
@@ -576,11 +574,8 @@ public final class LoaderTest {
                 .put(BAR.BAR_, 1)
                 .put(FOOBAR.FOOID, 1L)
                 .put(FOOBAR.BARID, 1L)
-                .build()));
-
-    ObjectGraph second = supplier.get();
-    accumulator.accept(
-        second,
+                .build());
+    Record secondRecord =
         createRecord(
             ImmutableMap.<Field<?>, Object>builder()
                 .put(FOO.ID, 2L)
@@ -589,10 +584,8 @@ public final class LoaderTest {
                 .put(BAR.BAR_, 2)
                 .put(FOOBAR.FOOID, 2L)
                 .put(FOOBAR.BARID, 2L)
-                .build()));
-
-    accumulator.accept(
-        second,
+                .build());
+    Record thirdRecord =
         createRecord(
             ImmutableMap.<Field<?>, Object>builder()
                 .put(FOO.ID, 1L)
@@ -601,11 +594,8 @@ public final class LoaderTest {
                 .put(BAR.BAR_, 3)
                 .put(FOOBAR.FOOID, 1L)
                 .put(FOOBAR.BARID, 3L)
-                .build()));
-
-    ObjectGraph third = supplier.get();
-    accumulator.accept(
-        third,
+                .build());
+    Record fourthRecord =
         createRecord(
             ImmutableMap.<Field<?>, Object>builder()
                 .put(FOO.ID, 2L)
@@ -614,13 +604,36 @@ public final class LoaderTest {
                 .put(BAR.BAR_, 4)
                 .put(FOOBAR.FOOID, 2L)
                 .put(FOOBAR.BARID, 4L)
-                .build()));
+                .build());
 
-    List<FooEntity> entities =
-        l.finisher().apply(combiner.apply(first, combiner.apply(second, third)));
+    ObjectGraph firstRight = supplier.get();
+    accumulator.accept(firstRight, firstRecord);
 
-    FooEntity expectedFoo1 = new FooEntity(1L, 2, null);
-    FooEntity expectedFoo2 = new FooEntity(2L, 3, null);
+    ObjectGraph secondRight = supplier.get();
+    accumulator.accept(secondRight, secondRecord);
+    accumulator.accept(secondRight, thirdRecord);
+
+    ObjectGraph thirdRight = supplier.get();
+    accumulator.accept(thirdRight, fourthRecord);
+
+    List<FooEntity> entitiesRightFolded =
+        l.finisher().apply(combiner.apply(firstRight, combiner.apply(secondRight, thirdRight)));
+
+    ObjectGraph firstLeft = supplier.get();
+    accumulator.accept(firstLeft, firstRecord);
+
+    ObjectGraph secondLeft = supplier.get();
+    accumulator.accept(secondLeft, secondRecord);
+    accumulator.accept(secondLeft, thirdRecord);
+
+    ObjectGraph thirdLeft = supplier.get();
+    accumulator.accept(thirdLeft, fourthRecord);
+
+    List<FooEntity> entitiesLeftFolded =
+        l.finisher().apply(combiner.apply(combiner.apply(firstLeft, secondLeft), thirdLeft));
+
+    FooEntity expectedFoo1 = new FooEntity(1L, 1, null);
+    FooEntity expectedFoo2 = new FooEntity(2L, 2, null);
     BarEntity expectedBar1 = new BarEntity(1L, null, 1, null, null);
     BarEntity expectedBar2 = new BarEntity(2L, null, 2, null, null);
     BarEntity expectedBar3 = new BarEntity(3L, null, 3, null, null);
@@ -632,7 +645,8 @@ public final class LoaderTest {
     expectedBar3.setFooList(ImmutableList.of(expectedFoo1));
     expectedBar4.setFooList(ImmutableList.of(expectedFoo2));
 
-    assertIterableEquals(ImmutableList.of(expectedFoo1, expectedFoo2), entities);
+    assertIterableEquals(ImmutableList.of(expectedFoo1, expectedFoo2), entitiesRightFolded);
+    assertIterableEquals(ImmutableList.of(expectedFoo1, expectedFoo2), entitiesLeftFolded);
   }
 
   // Collector contract tests
