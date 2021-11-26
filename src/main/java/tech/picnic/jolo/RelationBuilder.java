@@ -16,10 +16,10 @@ import tech.picnic.jolo.Relation.Arity;
 
 /**
  * Class used to specify a {@link Relation}. Cannot be instantiated directly, but is created as part
- * of the fluent API {@link LoaderFactory#create(Entity)}.
+ * of the fluent API {@link Loader#create(Entity)}.
  */
 public final class RelationBuilder<T, L, R> {
-  private final LoaderFactoryBuilderImpl<T> builder;
+  private final LoaderBuilderImpl<T> builder;
   private final Entity<L, ?> left;
   private final Entity<R, ?> right;
   @Nullable private Field<Long> leftKey;
@@ -30,14 +30,14 @@ public final class RelationBuilder<T, L, R> {
   @Nullable private BiConsumer<R, ?> rightSetter;
   private Optional<Function<Record, Set<IdPair>>> relationLoader = Optional.empty();
 
-  RelationBuilder(LoaderFactoryBuilderImpl<T> builder, Entity<L, ?> left, Entity<R, ?> right) {
+  RelationBuilder(LoaderBuilderImpl<T> builder, Entity<L, ?> left, Entity<R, ?> right) {
     this.builder = builder;
     this.left = left;
     this.right = right;
   }
 
   /** Shorthand for {@code .and().build()}, to make the API read more naturally. */
-  public LoaderFactory<T> build() {
+  public Loader<T> build() {
     return and().build();
   }
 
@@ -45,7 +45,7 @@ public final class RelationBuilder<T, L, R> {
    * Finalises the current relation definition and returns to the loader builder that the new
    * relation was created for.
    */
-  public LoaderFactoryBuilder<T> and() {
+  public LoaderBuilder<T> and() {
     validate(
         leftSetter != null || rightSetter != null,
         "Relationship between %s and %s has no setters",

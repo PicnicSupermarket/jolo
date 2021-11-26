@@ -3,6 +3,7 @@ package tech.picnic.jolo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static tech.picnic.jolo.Loader.toLinkedObjects;
 import static tech.picnic.jolo.TestUtil.createRecord;
 import static tech.picnic.jolo.data.schema.base.Tables.BAR;
 import static tech.picnic.jolo.data.schema.base.Tables.BAZ;
@@ -46,12 +47,11 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(fooTable, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(barTable, BarEntity.class);
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .oneToMany(foo, bar)
             .setManyLeft(FooEntity::setBarList)
             .setOneRight(BarEntity::setFoo)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -90,8 +90,7 @@ public final class LoaderTest {
   public void testOneToManyWrongWayAround() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    assertThrows(
-        IllegalArgumentException.class, () -> LoaderFactory.create(foo).oneToMany(bar, foo));
+    assertThrows(IllegalArgumentException.class, () -> Loader.create(foo).oneToMany(bar, foo));
   }
 
   @Test
@@ -99,11 +98,7 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
-            .oneToOne(bar, foo)
-            .setOneLeft(BarEntity::setFoo)
-            .build()
-            .newLoader();
+        Loader.create(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -140,11 +135,7 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
-            .oneToOne(bar, foo)
-            .setOneLeft(BarEntity::setFoo)
-            .build()
-            .newLoader();
+        Loader.create(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -171,7 +162,7 @@ public final class LoaderTest {
   public void testOneToOneAmbiguous() {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Entity<BazEntity, ?> baz = new Entity<>(BAZ, BazEntity.class);
-    assertThrows(ValidationException.class, () -> LoaderFactory.create(bar).oneToOne(bar, baz));
+    assertThrows(ValidationException.class, () -> Loader.create(bar).oneToOne(bar, baz));
   }
 
   @Test
@@ -179,12 +170,11 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .oneToZeroOrOne(foo, bar)
             .setZeroOrOneLeft(FooEntity::setBarOptional)
             .setOneRight(BarEntity::setFoo)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -211,11 +201,10 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .optionalOneToOne(bar, foo)
             .setZeroOrOneLeft(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -242,11 +231,10 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .optionalOneToOne(bar, foo)
             .setZeroOrOneLeft(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -268,11 +256,10 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .optionalOneToOne(bar, foo)
             .setZeroOrOneLeft(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -290,12 +277,11 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .zeroOrOneToMany(foo, bar)
             .setManyLeft(FooEntity::setBarList)
             .setZeroOrOneRight(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -323,11 +309,10 @@ public final class LoaderTest {
   public void testZeroOrOneToManyRecursiveReference() {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .zeroOrOneToMany(bar, bar)
             .setZeroOrOneRight(BarEntity::setOtherBar)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -351,11 +336,7 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
-            .oneToOne(bar, foo)
-            .setOneLeft(BarEntity::setFoo)
-            .build()
-            .newLoader();
+        Loader.create(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -381,12 +362,11 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -415,7 +395,7 @@ public final class LoaderTest {
   @Test
   public void testEmpty() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Loader<FooEntity> l = LoaderFactory.create(foo).build().newLoader();
+    Loader<FooEntity> l = Loader.create(foo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
 
@@ -428,13 +408,12 @@ public final class LoaderTest {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
 
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
             .setRelationLoader(record -> Set.of(IdPair.of(1, 1)))
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -461,13 +440,12 @@ public final class LoaderTest {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
 
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
             .setRelationLoader(LoaderTest::customRelationLoader)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -514,12 +492,11 @@ public final class LoaderTest {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
 
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
-            .build()
-            .newLoader();
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -559,7 +536,7 @@ public final class LoaderTest {
   @Test
   public void testLoadTwice() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Loader<FooEntity> l = LoaderFactory.create(foo).build().newLoader();
+    Loader<FooEntity> l = Loader.create(foo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -578,12 +555,11 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+        Loader.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
-            .build()
-            .newLoader();
+            .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -674,11 +650,10 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .optionalOneToOne(bar, foo)
             .setZeroOrOneLeft(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -719,11 +694,10 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .optionalOneToOne(bar, foo)
             .setZeroOrOneLeft(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -759,11 +733,10 @@ public final class LoaderTest {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        LoaderFactory.create(bar)
+        Loader.create(bar)
             .optionalOneToOne(bar, foo)
             .setZeroOrOneLeft(BarEntity::setFooOptional)
-            .build()
-            .newLoader();
+            .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -782,7 +755,7 @@ public final class LoaderTest {
   @Test
   public void testCollectorCharacteristics() {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l = LoaderFactory.create(bar).build().newLoader();
+    Loader<BarEntity> l = Loader.create(bar).build();
     assertIterableEquals(Set.of(), l.characteristics());
   }
 
@@ -791,16 +764,15 @@ public final class LoaderTest {
     Field<?> v = DSL.field("v", Integer.class);
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class).withExtraFields(v);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<FooEntity> l =
-        LoaderFactory.create(foo)
+    Loader<FooEntity> loader =
+        Loader.create(foo)
             .manyToMany(foo, bar, FOOBAR)
             .setManyLeft(FooEntity::setBarList)
             .setManyRight(BarEntity::setFooList)
             .and()
             .optionalOneToOne(bar, bar)
             .setZeroOrOneLeft(BarEntity::setOtherBar)
-            .build()
-            .newLoader();
+            .build();
 
     List<FooEntity> entities =
         Stream.of(
@@ -873,7 +845,7 @@ public final class LoaderTest {
                         .put(FOOBAR.BARID, 2L)
                         .build()))
             .parallel()
-            .collect(l);
+            .collect(toLinkedObjects(loader));
 
     FooEntity expectedFoo1 = new FooEntity(1L, 1, null, 42);
     FooEntity expectedFoo2 = new FooEntity(2L, 2, null, 43);
