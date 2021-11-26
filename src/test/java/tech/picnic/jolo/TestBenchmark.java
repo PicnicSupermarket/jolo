@@ -1,8 +1,7 @@
 package tech.picnic.jolo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static tech.picnic.jolo.Loader.toLinkedObjects;
 import static tech.picnic.jolo.TestUtil.createRecord;
 import static tech.picnic.jolo.data.schema.Tables.BAR;
 import static tech.picnic.jolo.data.schema.Tables.FOO;
@@ -50,12 +49,11 @@ public class TestBenchmark {
       Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
       Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
       loader =
-          LoaderFactory.create(foo)
+          Loader.create(foo)
               .manyToMany(foo, bar, FOOBAR)
               .setManyLeft(TestUtil.FooEntity::setBarList)
               .setManyRight(TestUtil.BarEntity::setFooList)
-              .build()
-              .newLoader();
+              .build();
     }
 
     @Setup(Level.Iteration)
@@ -88,7 +86,7 @@ public class TestBenchmark {
   @Measurement(iterations = 10, time = 1)
   @OutputTimeUnit(TimeUnit.MICROSECONDS)
   public void run(BenchmarkState state, Blackhole hole) {
-    List<TestUtil.FooEntity> objects = state.records.stream().collect(state.loader);
+    List<TestUtil.FooEntity> objects = state.records.stream().collect(toLinkedObjects(state.loader));
     hole.consume(objects);
   }
 

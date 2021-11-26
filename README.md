@@ -104,13 +104,12 @@ Using this library, you can specify how to instantiate the relationship between 
 (i.e., how to fill the `fleas` property of `Dog`):
 
 ```java
-LoaderFactory<Dog> createLoaderFactory() {
-  var dog = new Entity<>(Tables.DOG, Dog.class);
-  var flea = new Entity<>(Tables.FLEA, Flea.class);
-  return LoaderFactory.create(dog)
-      .oneToMany(dog, flea)
-      .setManyLeft(Dog::setFleas)
-      .build();
+class LoaderUtil {
+  static Loader<Dog> createLoader() {
+    var dog = new Entity<>(Tables.DOG, Dog.class);
+    var flea = new Entity<>(Tables.FLEA, Flea.class);
+    return Loader.create(dog).oneToMany(dog, flea).setManyLeft(Dog::setFleas).build();
+  }
 }
 ```
 
@@ -118,7 +117,7 @@ Then in the code that executes the query, you can use the loader to instantiate 
 
 ```java
 class Repository {
-  private static final LoaderFactory<Dog> LOADER_FACTORY = createLoaderFactory();
+  private static final Loader<Dog> LOADER = createLoader();
 
   private final DSLContext context;
 
@@ -127,7 +126,7 @@ class Repository {
       .from(DOG)
       .leftJoin(FLEA)
       .on(FLEA.DOG_ID.eq(DOG.ID))
-      .collect(LOADER_FACTORY.newLoader());
+      .collect(toLinkedObjects(LOADER));
 
     for (Dog dog : dogs) {
       int fleaWeight = dog.getFleas().stream().mapToInt(Flea::getWeight).sum();
