@@ -39,13 +39,13 @@ import org.jooq.Record;
  */
 public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> {
   private final Entity<T, ?> mainEntity;
-  private final Set<Entity<?, ?>> entities;
-  private final List<Relation<?, ?>> relations;
+  private final ImmutableSet<Entity<?, ?>> entities;
+  private final ImmutableSet<Relation<?, ?>> relations;
 
   Loader(Entity<T, ?> mainEntity, Set<Entity<?, ?>> entities, List<Relation<?, ?>> relations) {
     this.mainEntity = mainEntity;
-    this.entities = entities;
-    this.relations = relations;
+    this.entities = ImmutableSet.copyOf(entities);
+    this.relations = ImmutableSet.copyOf(relations);
   }
 
   @Override
