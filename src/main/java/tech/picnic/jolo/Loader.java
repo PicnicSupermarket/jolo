@@ -54,7 +54,7 @@ public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> 
   }
 
   /**
-   * Convenience function for increased readability when calling the loader as a parameter of {@link
+   * Convenience function for improved readability when calling the loader as a parameter of {@link
    * java.util.stream.Stream#collect(Collector)}. It returns the given loader.
    */
   public static <T> Loader<T> toLinkedObjects(Loader<T> loader) {

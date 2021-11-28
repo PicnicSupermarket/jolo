@@ -40,7 +40,8 @@ final class Relation<L, R> {
   private final Optional<BiConsumer<L, ?>> leftSetter;
   private final Optional<BiConsumer<R, ?>> rightSetter;
   private final Function<Record, Set<IdPair>> relationLoader;
-  private final boolean relationLoaderIsCustom;
+
+  private final int hashCode;
 
   @SuppressWarnings("ConstructorLeaksThis")
   Relation(
@@ -62,7 +63,17 @@ final class Relation<L, R> {
     this.leftSetter = leftSetter;
     this.rightSetter = rightSetter;
     this.relationLoader = relationLoader.orElse(this::foreignKeyRelationLoader);
-    relationLoaderIsCustom = relationLoader.isPresent();
+    this.hashCode =
+        Objects.hash(
+            this.left,
+            this.right,
+            this.leftKey,
+            this.rightKey,
+            this.leftArity,
+            this.rightArity,
+            this.leftSetter,
+            this.rightSetter,
+            this.relationLoader);
   }
 
   @Override
@@ -74,8 +85,7 @@ final class Relation<L, R> {
       return false;
     }
     Relation<?, ?> relation = (Relation<?, ?>) o;
-    return relationLoaderIsCustom == relation.relationLoaderIsCustom
-        && Objects.equals(left, relation.left)
+    return Objects.equals(left, relation.left)
         && Objects.equals(right, relation.right)
         && Objects.equals(leftKey, relation.leftKey)
         && Objects.equals(rightKey, relation.rightKey)
@@ -88,17 +98,7 @@ final class Relation<L, R> {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        left,
-        right,
-        leftKey,
-        rightKey,
-        leftArity,
-        rightArity,
-        leftSetter,
-        rightSetter,
-        relationLoader,
-        relationLoaderIsCustom);
+    return hashCode;
   }
 
   @Override
