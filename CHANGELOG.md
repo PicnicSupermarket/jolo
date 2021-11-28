@@ -18,7 +18,7 @@ requiring JDK v11+ and Jooq v3.15+ and dropping multiple public methods:
 - Remove `Entity#get(long id)`, `Entity#getEntities()` and `Entity#getEntityMap()`.
 - Remove `Loader#next(Record record)`, `Loader#get()`, `Loader#stream()`, `Loader#getSet()`, `Loader#getList()`
   , `Loader#getOne()`, `Loader#getOptional()`, `Loader#collect(Collector<? super T, A, R> collector)`.
-- Make `Entity` and `Relation` effectively immutable.
+- Make `Entity`, `Relation` and `Loader` effectively immutable.
 - Custom relation loaders have to implement `Function<Record, Set<IdPair>`.
 
 ## v0.0.2

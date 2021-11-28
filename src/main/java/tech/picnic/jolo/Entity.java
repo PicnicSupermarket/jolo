@@ -22,8 +22,10 @@ public final class Entity<T, R extends Record> {
   private final Table<R> table;
   private final Field<Long> primaryKey;
   private final Class<T> type;
-
   private final Field<?>[] fields;
+
+  private final int hashCode;
+
   @Nullable private Field<?>[] resultFields;
 
   /**
@@ -57,6 +59,8 @@ public final class Entity<T, R extends Record> {
     this.primaryKey = primaryKey;
     this.type = type;
     this.fields = fields;
+    this.hashCode =
+        Objects.hash(this.table, this.primaryKey, this.type, Arrays.hashCode(this.fields));
   }
 
   @Override
@@ -76,7 +80,7 @@ public final class Entity<T, R extends Record> {
 
   @Override
   public int hashCode() {
-    return Objects.hash(table, primaryKey, type, Arrays.hashCode(fields));
+    return hashCode;
   }
 
   @Override
@@ -96,9 +100,10 @@ public final class Entity<T, R extends Record> {
    * @apiNote This method returns a new object.
    */
   public Entity<T, R> withExtraFields(Field<?>... extraFields) {
-      Field<?>[] extendedFields = concat(stream(fields), stream(extraFields).filter(Objects::nonNull))
-              .toArray(Field<?>[]::new);
-      return new Entity<>(table, type, primaryKey, extendedFields);
+    Field<?>[] extendedFields =
+        concat(stream(fields), stream(extraFields).filter(Objects::nonNull))
+            .toArray(Field<?>[]::new);
+    return new Entity<>(table, type, primaryKey, extendedFields);
   }
 
   /** The table that is mapped by this entity. */
