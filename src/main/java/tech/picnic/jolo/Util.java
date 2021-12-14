@@ -4,7 +4,6 @@ import com.google.errorprone.annotations.FormatMethod;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Record;
 import org.jooq.Table;

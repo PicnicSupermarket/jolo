@@ -15,13 +15,13 @@ import org.jooq.Record;
 
 /**
  * {@link Record} {@link Collector} that loads entity-relation graphs from a data set. To create a
- * {@code Loader}, use {@link Loader#create}. The loader can be used as follows:
+ * {@code Loader}, use {@link Loader#of}. The loader can be used as follows:
  *
  * <pre>{@code
  * // In static initialisation code, set up the loader
  * private static final Entity<T> MY_ENTITY = ...;
  * private static final Loader<T> LOADER =
- *     Loader.create(MY_ENTITY)
+ *     Loader.of(MY_ENTITY)
  *             .relation(...)
  *             .oneToMany(...)
  *             .setOneLeft(...)
@@ -49,7 +49,7 @@ public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> 
     this.relations = ImmutableSet.copyOf(relations);
   }
 
-  static <T> LoaderBuilder<T> create(Entity<T, ?> mainEntity) {
+  public static <T> LoaderBuilder<T> of(Entity<T, ?> mainEntity) {
     return new LoaderBuilderImpl<>(mainEntity);
   }
 
