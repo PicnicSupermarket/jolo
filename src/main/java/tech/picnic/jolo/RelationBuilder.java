@@ -16,7 +16,7 @@ import tech.picnic.jolo.Relation.Arity;
 
 /**
  * Class used to specify a {@link Relation}. Cannot be instantiated directly, but is created as part
- * of the fluent API {@link Loader#create(Entity)}.
+ * of the fluent API {@link Loader#of(Entity)}.
  */
 public final class RelationBuilder<T, L, R> {
   private final LoaderBuilderImpl<T> builder;
