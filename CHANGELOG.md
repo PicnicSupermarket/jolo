@@ -15,10 +15,11 @@ requiring JDK v11+ and Jooq v3.15+ and dropping multiple public methods:
 - Implement `Collector<Record, ObjectGraph, List<T>>` for `Loader<T>` to be used
   with `org.jooq.ResultQuery#collect(Collector<? super R, A, X> collector)`. See the [README.md] for updated usage
   advice.
-- Remove `Entity#get(long id)`, `Entity#getEntities()` and `Entity#getEntityMap()`.
+- Make `Entity`, `Relation` and `Loader` effectively immutable.
+- Remove or hide `Entity#get(long id)`, `Entity#getEntities()`, `Entity#getEntityMap()`. `Entity#copy()`
+  , `Entity#load(Record record)`
 - Remove `Loader#next(Record record)`, `Loader#get()`, `Loader#stream()`, `Loader#getSet()`, `Loader#getList()`
   , `Loader#getOne()`, `Loader#getOptional()`, `Loader#collect(Collector<? super T, A, R> collector)`.
-- Make `Entity`, `Relation` and `Loader` effectively immutable.
 - Custom relation loaders have to implement `Function<Record, Set<IdPair>`.
 
 ## v0.0.2

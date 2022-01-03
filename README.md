@@ -108,7 +108,7 @@ class LoaderUtil {
   static Loader<Dog> createLoader() {
     var dog = new Entity<>(Tables.DOG, Dog.class);
     var flea = new Entity<>(Tables.FLEA, Flea.class);
-    return Loader.create(dog).oneToMany(dog, flea).setManyLeft(Dog::setFleas).build();
+    return Loader.of(dog).oneToMany(dog, flea).setManyLeft(Dog::setFleas).build();
   }
 }
 ```
@@ -126,7 +126,7 @@ class Repository {
       .from(DOG)
       .leftJoin(FLEA)
       .on(FLEA.DOG_ID.eq(DOG.ID))
-      .collect(toLinkedObjects(LOADER));
+      .collect(toLinkedObjectsWith(LOADER));
 
     for (Dog dog : dogs) {
       int fleaWeight = dog.getFleas().stream().mapToInt(Flea::getWeight).sum();
