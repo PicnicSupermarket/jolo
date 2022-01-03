@@ -20,7 +20,7 @@ import org.jooq.Record;
  * <pre>{@code
  * // In static initialisation code, set up the loader
  * private static final Entity<T> MY_ENTITY = ...;
- * private static final Loader<T> LOADER =
+ * private static final Loader<T> TO_LINKED_ENTITIES =
  *     Loader.of(MY_ENTITY)
  *             .relation(...)
  *             .oneToMany(...)
@@ -31,7 +31,7 @@ import org.jooq.Record;
  *
  * // At runtime:
  * Query query = ...;
- * List<T> result = query.collect(toLinkedObjects(LOADER));
+ * List<T> result = query.collect(TO_LINKED_ENTITIES);
  * }</pre>
  *
  * <p>It is highly recommended to initialise the loader as early as possible, because during
@@ -57,7 +57,7 @@ public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> 
    * Convenience function for improved readability when calling the loader as a parameter of {@link
    * java.util.stream.Stream#collect(Collector)}. It returns the given loader.
    */
-  public static <T> Loader<T> toLinkedObjects(Loader<T> loader) {
+  public static <T> Loader<T> toLinkedObjectsWith(Loader<T> loader) {
     return loader;
   }
 

@@ -3,7 +3,7 @@ package tech.picnic.jolo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static tech.picnic.jolo.Loader.toLinkedObjects;
+import static tech.picnic.jolo.Loader.toLinkedObjectsWith;
 import static tech.picnic.jolo.TestUtil.createRecord;
 import static tech.picnic.jolo.data.schema.base.Tables.BAR;
 import static tech.picnic.jolo.data.schema.base.Tables.BAZ;
@@ -859,7 +859,7 @@ public final class LoaderTest {
                         .put(FOOBAR.BARID, 2L)
                         .build()))
             .parallel()
-            .collect(toLinkedObjects(loader));
+            .collect(toLinkedObjectsWith(loader));
 
     FooEntity expectedFoo1 = new FooEntity(1L, 1, null, 42);
     FooEntity expectedFoo2 = new FooEntity(2L, 2, null, 43);
