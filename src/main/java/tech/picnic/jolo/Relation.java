@@ -1,13 +1,10 @@
 package tech.picnic.jolo;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.MoreCollectors.toOptional;
 import static tech.picnic.jolo.Util.validate;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -133,8 +130,7 @@ final class Relation<L, R> {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private <T, U> void link(
-      BiConsumer setter, ImmutableMap<T, ImmutableList<U>> objectMapping, Arity arity) {
+  private <T, U> void link(BiConsumer setter, Map<T, List<U>> objectMapping, Arity arity) {
     switch (arity) {
       case MANY:
         linkMany(objectMapping, setter);
@@ -148,8 +144,7 @@ final class Relation<L, R> {
     }
   }
 
-  private <T, U> void linkOne(
-      ImmutableMap<T, ImmutableList<U>> objectMapping, BiConsumer<T, U> setter) {
+  private <T, U> void linkOne(Map<T, List<U>> objectMapping, BiConsumer<T, U> setter) {
     objectMapping.forEach(
         (object, successors) -> {
           validate(
@@ -159,13 +154,15 @@ final class Relation<L, R> {
               leftArity,
               right,
               rightArity);
-          checkArgument(!successors.isEmpty());
+          if (successors.isEmpty()) {
+            throw new IllegalArgumentException();
+          }
           setter.accept(object, successors.get(0));
         });
   }
 
   private <T, U> void linkOptional(
-      ImmutableMap<T, ImmutableList<U>> objectMapping, BiConsumer<T, Optional<U>> setter) {
+      Map<T, List<U>> objectMapping, BiConsumer<T, Optional<U>> setter) {
     objectMapping.forEach(
         (object, successors) -> {
           validate(
@@ -175,12 +172,13 @@ final class Relation<L, R> {
               leftArity,
               right,
               rightArity);
-          setter.accept(object, successors.stream().collect(toOptional()));
+          setter.accept(
+              object, (successors.isEmpty()) ? Optional.empty() : Optional.of(successors.get(0)));
         });
   }
 
   private static <T, U> void linkMany(
-      ImmutableMap<T, ImmutableList<U>> objectMapping, BiConsumer<T, Collection<U>> setter) {
+      Map<T, List<U>> objectMapping, BiConsumer<T, Collection<U>> setter) {
     objectMapping.forEach(setter);
   }
 
@@ -190,13 +188,9 @@ final class Relation<L, R> {
    * key, or two foreign keys in case of a many-to-may relation), and if both can be found, the two
    * values are considered to represent a pair that is part of the relation.
    */
-  private ImmutableSet<IdPair> foreignKeyRelationLoader(Record record) {
+  private Set<IdPair> foreignKeyRelationLoader(Record record) {
     Long leftId = record.get(leftKey);
     Long rightId = record.get(rightKey);
-    ImmutableSet.Builder<IdPair> sink = ImmutableSet.builder();
-    if (leftId != null && rightId != null) {
-      sink.add(IdPair.of(leftId, rightId));
-    }
-    return sink.build();
+    return (leftId != null && rightId != null) ? Set.of(IdPair.of(leftId, rightId)) : Set.of();
   }
 }
