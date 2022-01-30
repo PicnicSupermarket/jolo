@@ -1,7 +1,7 @@
 package tech.picnic.jolo;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
 import org.immutables.value.Value;
 
 /**
@@ -20,8 +20,8 @@ import org.immutables.value.Value;
 interface ObjectMappingInterface<L, R> {
 
   /** Returns a map of all {@code L} objects to their related {@code R} objects. */
-  ImmutableMap<L, ImmutableList<R>> toSuccessors();
+  Map<L, List<R>> toSuccessors();
 
   /** Returns a reverse map of all {@code R} objects to their related {@code L} objects. */
-  ImmutableMap<R, ImmutableList<L>> toPredecessors();
+  Map<R, List<L>> toPredecessors();
 }

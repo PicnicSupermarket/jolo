@@ -2,7 +2,6 @@ package tech.picnic.jolo;
 
 import static java.util.Collections.emptySet;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -40,13 +39,13 @@ import org.jooq.Record;
  */
 public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> {
   private final Entity<T, ?> mainEntity;
-  private final ImmutableSet<Entity<?, ?>> entities;
-  private final ImmutableSet<Relation<?, ?>> relations;
+  private final Set<Entity<?, ?>> entities;
+  private final Set<Relation<?, ?>> relations;
 
   Loader(Entity<T, ?> mainEntity, Set<Entity<?, ?>> entities, List<Relation<?, ?>> relations) {
     this.mainEntity = mainEntity;
-    this.entities = ImmutableSet.copyOf(entities);
-    this.relations = ImmutableSet.copyOf(relations);
+    this.entities = Set.copyOf(entities);
+    this.relations = Set.copyOf(relations);
   }
 
   public static <T> LoaderBuilder<T> of(Entity<T, ?> mainEntity) {

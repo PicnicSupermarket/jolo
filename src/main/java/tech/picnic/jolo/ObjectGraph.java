@@ -1,17 +1,15 @@
 package tech.picnic.jolo;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static tech.picnic.jolo.Util.validate;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Table;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -26,12 +24,12 @@ import org.jooq.Record;
  * @apiNote Access is not synchronized.
  */
 final class ObjectGraph {
-  private final Table<Entity<?, ?>, Long, Object> entityAndIdToObject;
-  private final SetMultimap<Relation<?, ?>, IdPair> relationToLinks;
+  private final Map<Entity<?, ?>, Map<Long, Object>> entityAndIdToObject;
+  private final Map<Relation<?, ?>, Set<IdPair>> relationToLinks;
 
   ObjectGraph() {
-    entityAndIdToObject = HashBasedTable.create();
-    relationToLinks = MultimapBuilder.hashKeys().linkedHashSetValues().build();
+    entityAndIdToObject = new LinkedHashMap<>(8);
+    relationToLinks = new LinkedHashMap<>(8);
   }
 
   /**
@@ -39,14 +37,30 @@ final class ObjectGraph {
    * same entity and with the same ID already exists, the given object is ignored.
    */
   <E> void add(Entity<? extends E, ?> entity, long id, E object) {
-    if (!entityAndIdToObject.contains(entity, id)) {
-      entityAndIdToObject.put(entity, id, object);
-    }
+    entityAndIdToObject.compute(
+        entity,
+        (e, idToObject) -> {
+          if (idToObject == null) {
+            return new LinkedHashMap<>(Map.of(id, object));
+          } else {
+            idToObject.putIfAbsent(id, object);
+            return idToObject;
+          }
+        });
   }
 
   /** Add links loaded by the given {@link Relation relation}. */
   <L, R> void add(Relation<L, R> relation, Set<IdPair> links) {
-    relationToLinks.putAll(relation, links);
+    relationToLinks.compute(
+        relation,
+        (rel, currentLinks) -> {
+          if (currentLinks == null) {
+            return new LinkedHashSet<>(links);
+          } else {
+            currentLinks.addAll(links);
+            return currentLinks;
+          }
+        });
   }
 
   /**
@@ -58,10 +72,10 @@ final class ObjectGraph {
    */
   void merge(ObjectGraph other) {
     requireNonNull(other);
-    for (var cell : other.entityAndIdToObject.cellSet()) {
-      add(cell.getRowKey(), cell.getColumnKey(), cell.getValue());
+    for (var entry : other.entityAndIdToObject.entrySet()) {
+      entry.getValue().forEach((key, value) -> add(entry.getKey(), key, value));
     }
-    relationToLinks.putAll(other.relationToLinks);
+    other.relationToLinks.forEach(this::add);
   }
 
   /**
@@ -70,30 +84,32 @@ final class ObjectGraph {
    */
   @SuppressWarnings("unchecked")
   <L, R> ObjectMapping<L, R> getObjectMapping(Relation<L, R> relation) {
-    Map<Long, L> leftObjectsById = (Map<Long, L>) entityAndIdToObject.row(relation.getLeft());
-    Map<Long, R> rightObjectsById = (Map<Long, R>) entityAndIdToObject.row(relation.getRight());
+    Map<Long, L> leftObjectsById =
+        (Map<Long, L>) entityAndIdToObject.getOrDefault(relation.getLeft(), Map.of());
+    Map<Long, R> rightObjectsById =
+        (Map<Long, R>) entityAndIdToObject.getOrDefault(relation.getRight(), Map.of());
 
-    Map<L, ImmutableList<R>> objectToSuccessors =
-        relationToLinks.get(relation).stream()
+    Map<L, List<R>> objectToSuccessors =
+        relationToLinks.getOrDefault(relation, Set.of()).stream()
             .collect(
                 groupingBy(
                     idPair -> getObject(relation.getLeft(), leftObjectsById, idPair.getLeftId()),
                     mapping(
                         idPair ->
                             getObject(relation.getRight(), rightObjectsById, idPair.getRightId()),
-                        toImmutableList())));
-    leftObjectsById.values().forEach(o -> objectToSuccessors.putIfAbsent(o, ImmutableList.of()));
+                        toUnmodifiableList())));
+    leftObjectsById.values().forEach(o -> objectToSuccessors.putIfAbsent(o, List.of()));
 
-    Map<R, ImmutableList<L>> objectToPredecessors =
-        relationToLinks.get(relation).stream()
+    Map<R, List<L>> objectToPredecessors =
+        relationToLinks.getOrDefault(relation, Set.of()).stream()
             .collect(
                 groupingBy(
                     idPair -> getObject(relation.getRight(), rightObjectsById, idPair.getRightId()),
                     mapping(
                         idPair ->
                             getObject(relation.getLeft(), leftObjectsById, idPair.getLeftId()),
-                        toImmutableList())));
-    rightObjectsById.values().forEach(o -> objectToPredecessors.putIfAbsent(o, ImmutableList.of()));
+                        toUnmodifiableList())));
+    rightObjectsById.values().forEach(o -> objectToPredecessors.putIfAbsent(o, List.of()));
 
     return ObjectMapping.of(objectToSuccessors, objectToPredecessors);
   }
@@ -101,7 +117,7 @@ final class ObjectGraph {
   /** Objects loaded by the given {@link Entity entity}. */
   @SuppressWarnings("unchecked")
   <E> Collection<E> getObjects(Entity<E, ? extends Record> entity) {
-    return (Collection<E>) entityAndIdToObject.row(entity).values();
+    return (Collection<E>) entityAndIdToObject.getOrDefault(entity, Map.of()).values();
   }
 
   @Override
