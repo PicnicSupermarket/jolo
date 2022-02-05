@@ -26,6 +26,10 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.VerboseMode;
 
 public class TestBenchmark {
 
@@ -37,7 +41,7 @@ public class TestBenchmark {
     List<Record> records;
     Loader<TestUtil.FooEntity> loader;
 
-    @Setup(Level.Invocation)
+    @Setup(Level.Trial)
     public void initializeLoader() {
       Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
       Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
@@ -51,7 +55,7 @@ public class TestBenchmark {
 
     @Setup(Level.Iteration)
     public void generateRecords() {
-      Random random = new Random();
+      Random random = new Random(42);
       records =
           Stream.generate(
                   () -> {
@@ -76,7 +80,7 @@ public class TestBenchmark {
   @BenchmarkMode(Mode.AverageTime)
   @Fork(warmups = 1, value = 1)
   @Warmup(iterations = 2, time = 1)
-  @Measurement(iterations = 10, time = 1)
+  @Measurement(iterations = 20, time = 1)
   @OutputTimeUnit(TimeUnit.MICROSECONDS)
   public void benchmark(BenchmarkState state, Blackhole hole) {
     List<TestUtil.FooEntity> objects =
@@ -85,6 +89,12 @@ public class TestBenchmark {
   }
 
   public static void main(String[] args) throws Exception {
-    org.openjdk.jmh.Main.main(args);
+    Options options =
+        new OptionsBuilder()
+            .verbosity(VerboseMode.EXTRA)
+            .addProfiler("jfr")
+            .include(TestBenchmark.class.getSimpleName())
+            .build();
+    new Runner(options).run();
   }
 }
