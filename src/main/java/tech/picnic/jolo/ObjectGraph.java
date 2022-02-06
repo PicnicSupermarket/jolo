@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.jooq.Record;
 
@@ -36,14 +37,14 @@ final class ObjectGraph {
    * Add an object loaded by the given {@link Entity entity} with the given ID. If an object of the
    * same entity and with the same ID already exists, the given object is ignored.
    */
-  <E> void add(Entity<? extends E, ?> entity, long id, E object) {
+  <E> void add(Entity<? extends E, ?> entity, long id, Supplier<E> object) {
     entityAndIdToObject.compute(
         entity,
         (e, idToObject) -> {
           if (idToObject == null) {
-            return new LinkedHashMap<>(Map.of(id, object));
+            return new LinkedHashMap<>(Map.of(id, object.get()));
           } else {
-            idToObject.putIfAbsent(id, object);
+            idToObject.computeIfAbsent(id, key -> object.get());
             return idToObject;
           }
         });
@@ -73,7 +74,7 @@ final class ObjectGraph {
   void merge(ObjectGraph other) {
     requireNonNull(other);
     for (var entry : other.entityAndIdToObject.entrySet()) {
-      entry.getValue().forEach((key, value) -> add(entry.getKey(), key, value));
+      entry.getValue().forEach((key, value) -> add(entry.getKey(), key, () -> value));
     }
     other.relationToLinks.forEach(this::add);
   }
