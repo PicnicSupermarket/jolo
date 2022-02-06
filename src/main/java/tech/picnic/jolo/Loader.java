@@ -71,7 +71,7 @@ public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> 
   public BiConsumer<ObjectGraph, Record> accumulator() {
     return (objectGraph, record) -> {
       for (Entity<?, ?> entity : entities) {
-        entity.getId(record).ifPresent(id -> objectGraph.add(entity, id, entity.load(record)));
+        entity.getId(record).ifPresent(id -> objectGraph.add(entity, id, () -> entity.load(record)));
       }
       for (Relation<?, ?> relation : relations) {
         objectGraph.add(relation, relation.getRelationLoader().apply(record));
