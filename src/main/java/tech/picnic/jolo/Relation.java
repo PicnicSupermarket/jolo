@@ -5,12 +5,10 @@ import static tech.picnic.jolo.Util.validate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import org.jooq.Field;
 import org.jooq.Record;
 
@@ -38,8 +36,6 @@ final class Relation<L, R> {
   private final Optional<BiConsumer<R, ?>> rightSetter;
   private final Function<Record, Set<IdPair>> relationLoader;
 
-  private final int hashCode;
-
   @SuppressWarnings("ConstructorLeaksThis")
   Relation(
       Entity<L, ?> left,
@@ -60,42 +56,6 @@ final class Relation<L, R> {
     this.leftSetter = leftSetter;
     this.rightSetter = rightSetter;
     this.relationLoader = relationLoader.orElse(this::foreignKeyRelationLoader);
-    this.hashCode =
-        Objects.hash(
-            this.left,
-            this.right,
-            this.leftKey,
-            this.rightKey,
-            this.leftArity,
-            this.rightArity,
-            this.leftSetter,
-            this.rightSetter,
-            this.relationLoader);
-  }
-
-  @Override
-  public boolean equals(@Nullable Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Relation<?, ?> relation = (Relation<?, ?>) o;
-    return Objects.equals(left, relation.left)
-        && Objects.equals(right, relation.right)
-        && Objects.equals(leftKey, relation.leftKey)
-        && Objects.equals(rightKey, relation.rightKey)
-        && leftArity == relation.leftArity
-        && rightArity == relation.rightArity
-        && Objects.equals(leftSetter, relation.leftSetter)
-        && Objects.equals(rightSetter, relation.rightSetter)
-        && Objects.equals(relationLoader, relation.relationLoader);
-  }
-
-  @Override
-  public int hashCode() {
-    return hashCode;
   }
 
   @Override

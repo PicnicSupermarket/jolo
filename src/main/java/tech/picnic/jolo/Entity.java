@@ -4,7 +4,6 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Stream.concat;
 import static tech.picnic.jolo.Util.validate;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -23,8 +22,6 @@ public final class Entity<T, R extends Record> {
   private final Field<Long> primaryKey;
   private final Class<T> type;
   private final Field<?>[] fields;
-
-  private final int hashCode;
 
   @Nullable private Field<?>[] resultFields;
 
@@ -59,28 +56,6 @@ public final class Entity<T, R extends Record> {
     this.primaryKey = primaryKey;
     this.type = type;
     this.fields = fields;
-    this.hashCode =
-        Objects.hash(this.table, this.primaryKey, this.type, Arrays.hashCode(this.fields));
-  }
-
-  @Override
-  public boolean equals(@Nullable Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Entity<?, ?> entity = (Entity<?, ?>) o;
-    return Objects.equals(table, entity.table)
-        && Objects.equals(primaryKey, entity.primaryKey)
-        && Objects.equals(type, entity.type)
-        && Arrays.equals(fields, entity.fields);
-  }
-
-  @Override
-  public int hashCode() {
-    return hashCode;
   }
 
   @Override
