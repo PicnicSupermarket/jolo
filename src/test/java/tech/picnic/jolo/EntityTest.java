@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static tech.picnic.jolo.TestUtil.createRecord;
-import static tech.picnic.jolo.data.schema.Tables.FOO;
+import static tech.picnic.jolo.data.schema.base.Tables.FOO;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -17,8 +17,8 @@ import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import tech.picnic.jolo.TestUtil.FooEntity;
-import tech.picnic.jolo.data.schema.tables.Foo;
-import tech.picnic.jolo.data.schema.tables.records.FooRecord;
+import tech.picnic.jolo.data.schema.base.tables.Foo;
+import tech.picnic.jolo.data.schema.base.tables.records.FooRecord;
 
 // XXX: Suppressing NullAway warnings pending resolution of
 // https://github.com/jOOQ/jOOQ/issues/4748.

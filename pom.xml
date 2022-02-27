@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>tech.picnic</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>0.0.3</version>
-    </parent>
 
     <groupId>tech.picnic.jolo</groupId>
     <artifactId>jolo</artifactId>
@@ -59,8 +52,8 @@
 
     <scm>
         <developerConnection>scm:git:git@github.com:PicnicSupermarket/jolo.git</developerConnection>
-        <url>https://github.com/PicnicSupermarket/jolo</url>
         <tag>HEAD</tag>
+        <url>https://github.com/PicnicSupermarket/jolo</url>
     </scm>
     <issueManagement>
         <system>Github</system>
@@ -72,33 +65,93 @@
     </ciManagement>
 
     <properties>
-        <version.immutables>2.8.8</version.immutables>
-        <version.jdk>11</version.jdk>
-        <version.jooq>3.15.3</version.jooq>
-        <version.maven>3.8.1</version.maven>
-        <version.error-prone>2.9.0</version.error-prone>
-        <version.error-prone-javac>10+23</version.error-prone-javac>
+        <build.number>LOCAL</build.number>
+        <!-- Property using which additional Error Prone flags can be
+        specified. Used by the `patch` profile to enable patching. -->
+        <error-prone.args />
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.auto-service>1.0</version.auto-service>
+        <version.error-prone>2.10.0</version.error-prone>
+        <version.guava>31.0.1-jre</version.guava>
         <version.guava-beta-checker>1.0</version.guava-beta-checker>
-        <version.nullaway>0.9.2</version.nullaway>
-        <version.jmh>1.33</version.jmh>
+        <version.immutables>2.9.0</version.immutables>
+        <version.jdk>11</version.jdk>
+        <version.jmh>1.34</version.jmh>
+        <version.jooq>3.15.4</version.jooq>
+        <version.maven>3.8.1</version.maven>
+        <version.maven-plugin-tools>3.6.0</version.maven-plugin-tools>
+        <version.mockito>4.3.1</version.mockito>
+        <version.nullaway>0.9.5</version.nullaway>
+        <version.postgresql>42.3.0</version.postgresql>
+        <version.surefire>2.22.2</version.surefire>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service-annotations</artifactId>
+                <version>${version.auto-service}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${version.error-prone}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${version.guava}</version>
+            </dependency>
             <dependency>
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
                 <version>1.3.2</version>
             </dependency>
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>31.0.1-jre</version>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-artifact</artifactId>
+                <version>${version.maven}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-core</artifactId>
+                <version>${version.maven}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-plugin-api</artifactId>
+                <version>${version.maven}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.plugin-tools</groupId>
+                <artifactId>maven-plugin-annotations</artifactId>
+                <version>${version.maven-plugin-tools}</version>
             </dependency>
             <dependency>
                 <groupId>org.immutables</groupId>
                 <artifactId>value-annotations</artifactId>
                 <version>${version.immutables}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+                <version>${version.jooq}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen</artifactId>
+                <version>${version.jooq}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-meta</artifactId>
+                <version>${version.jooq}</version>
             </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
@@ -107,9 +160,31 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-bom</artifactId>
+                <version>${version.mockito}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${version.postgresql}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -149,10 +224,7 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${version.jmh}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -160,8 +232,40 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.coveo</groupId>
+                    <artifactId>fmt-maven-plugin</artifactId>
+                    <version>2.9.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.ekryd.sortpom</groupId>
+                    <artifactId>sortpom-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <configuration>
+                        <createBackupFile>false</createBackupFile>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <expandEmptyElements>false</expandEmptyElements>
+                        <nrOfIndentSpace>4</nrOfIndentSpace>
+                        <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+                        <sortDependencies>groupId,artifactId</sortDependencies>
+                        <sortDependencyExclusions>groupId,artifactId</sortDependencyExclusions>
+                        <sortModules>true</sortModules>
+                        <sortPlugins>groupId,artifactId</sortPlugins>
+                        <sortProperties>true</sortProperties>
+                        <verifyFail>warn</verifyFail>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                            <phase>verify</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.1.2</version>
                     <configuration>
                         <!-- The plugin's "excludes" property accepts an Ant
                         pattern, but does not match against the full path. So
@@ -173,7 +277,143 @@
                         <testSourceDirectories>
                             <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
                         </testSourceDirectories>
+                        <checkstyleRules>
+                            <!-- We only enable rules that are not enforced by
+                            Error Prone or automatically corrected through
+                            application of google-java-format. -->
+                            <module name="Checker">
+                                <module name="SuppressWarningsFilter" />
+                                <module name="TreeWalker">
+                                    <module name="AnnotationUseStyle">
+                                        <!-- XXX: Right now this check doesn't
+                                        completely enforce the desired style.
+                                        See https://github.com/checkstyle/checkstyle/issues/4972;
+                                        we're looking for the proposed `compact
+                                        = ALWAYS` and `singleArrayCurlies =
+                                        NEVER` style. -->
+                                    </module>
+                                    <module name="DeclarationOrder">
+                                        <!-- We don't enforce sorting fields by
+                                        their visibility modifier, for two
+                                        reasons:
+                                        - During (class) initialization
+                                          declaration order matters. Though the
+                                          plugin does not warn about fields
+                                          with obvious dependencies, its
+                                          dependency analysis is necessarily
+                                          incomplete; NPEs may result if some
+                                          of its advice is followed.
+                                        - Sometimes a field is annotated
+                                          `@VisibleForTesting`. It may then be
+                                          preferable not to reorder. The plugin
+                                          does not current respect this
+                                          annotation. -->
+                                        <property name="ignoreModifiers" value="true" />
+                                    </module>
+                                    <module name="DefaultComesLast" />
+                                    <module name="DesignForExtension" />
+                                    <module name="EmptyBlock" />
+                                    <module name="EmptyCatchBlock" />
+                                    <module name="EmptyStatement" />
+                                    <module name="FinalClass" />
+                                    <module name="HiddenFieldCheck">
+                                        <property name="ignoreConstructorParameter" value="true" />
+                                        <property name="ignoreSetter" value="true" />
+                                        <property name="setterCanReturnItsClass" value="true" />
+                                    </module>
+                                    <module name="IllegalImport">
+                                        <property name="illegalClasses" value="javax.annotation.concurrent.Immutable">
+                                            <!-- Instead, please use
+                                            `com.google.errorprone.annotations.Immutable`. -->
+                                        </property>
+                                        <property name="illegalClasses" value="javax.xml.bind.DatatypeConverter" />
+                                        <property name="illegalClasses" value="org.springframework.context.annotation.ComponentScan">
+                                            <!-- Instead, please explicitly
+                                            `@Import` the components. -->
+                                        </property>
+                                        <property name="illegalPkgs" value="com.amazonaws.annotation" />
+                                        <property name="illegalPkgs" value="com.beust.jcommander.internal" />
+                                        <property name="illegalPkgs" value="com.google.api.client.repackaged" />
+                                        <property name="illegalPkgs" value="com.newrelic.agent.deps" />
+                                        <property name="illegalPkgs" value="jdk" />
+                                        <property name="illegalPkgs" value="jersey.repackaged" />
+                                        <property name="illegalPkgs" value="nl.jqno.equalsverifier.internal" />
+                                        <property name="illegalPkgs" value="org.apache.commons.lang3">
+                                            <!-- Instead, please use Guava or a
+                                            custom helper method. -->
+                                        </property>
+                                        <property name="illegalPkgs" value="org.immutables.value.internal" />
+                                        <property name="illegalPkgs" value="org.mutabilitydetector.internal" />
+                                    </module>
+                                    <module name="IllegalImport">
+                                        <!-- XXX: This config uses
+                                        regexes so as to disallow static
+                                        imports. Once `illegalClasses`
+                                        disallows static imports by default,
+                                        this config can be merged into the one
+                                        above. See
+                                        https://github.com/checkstyle/checkstyle/issues/4954. -->
+                                        <property name="illegalClasses" value="org\.testng\.AssertJUnit(\..*?)?" />
+                                        <property name="regexp" value="true" />
+                                    </module>
+                                    <module name="IllegalCatch" />
+                                    <module name="IllegalThrows" />
+                                    <module name="InnerAssignment" />
+                                    <module name="InvalidJavadocPosition" />
+                                    <module name="MissingDeprecated" />
+                                    <module name="MutableException" />
+                                    <module name="NeedBraces" />
+                                    <module name="NoClone" />
+                                    <module name="NoFinalizer" />
+                                    <module name="PackageDeclaration" />
+                                    <module name="ParameterAssignment" />
+                                    <module name="RedundantModifier" />
+                                    <module name="SimplifyBooleanExpression" />
+                                    <module name="SimplifyBooleanReturn" />
+                                    <module name="SuppressWarningsHolder" />
+                                    <module name="TrailingComment" />
+                                    <module name="WriteTag">
+                                        <property name="tag" value="@author" />
+                                        <property name="tagFormat" value="\S" />
+                                        <property name="tagSeverity" value="error" />
+                                        <property name="severity" value="ignore" />
+                                    </module>
+                                    <module name="UnnecessaryParentheses" />
+                                    <module name="UnnecessarySemicolonInEnumeration" />
+                                    <module name="UnnecessarySemicolonInTryWithResources" />
+                                    <module name="UnusedImports">
+                                        <!-- Error-prone also detects these,
+                                        but (currently) doesn't warn about
+                                        JavaDoc-only imports. -->
+                                    </module>
+                                </module>
+                                <module name="UniqueProperties" />
+                            </module>
+                        </checkstyleRules>
+                        <excludes>**/data/**/schema/**/*</excludes>
+                        <failOnViolation>false</failOnViolation>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>9.2.1</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>run-checkstyle</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -189,22 +429,33 @@
                             <path>
                                 <groupId>com.google.guava</groupId>
                                 <artifactId>guava</artifactId>
-                                <version>31.0.1-jre</version>
+                                <version>${version.guava}</version>
                             </path>
                             <path>
                                 <groupId>org.openjdk.jmh</groupId>
                                 <artifactId>jmh-generator-annprocess</artifactId>
                                 <version>${version.jmh}</version>
                             </path>
+                            <path>
+                                <groupId>com.google.auto.service</groupId>
+                                <artifactId>auto-service</artifactId>
+                                <version>${version.auto-service}</version>
+                            </path>
                         </annotationProcessorPaths>
+                        <parameters>true</parameters>
+                        <source>${version.jdk}</source>
+                        <target>${version.jdk}</target>
+                        <!-- Erroneously inverted logic... for details, see
+                        https://issues.apache.org/jira/browse/MCOMPILER-209. -->
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
                     </configuration>
                     <executions>
                         <execution>
                             <id>default-testCompile</id>
-                            <phase>test-compile</phase>
                             <goals>
                                 <goal>testCompile</goal>
                             </goals>
+                            <phase>test-compile</phase>
                             <configuration>
                                 <compilerArgs>
                                     <!-- XXX: We disable `html` checks to work
@@ -218,8 +469,108 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.2</version>
                     <configuration>
+                        <ignoreDirect>false</ignoreDirect>
+                        <ignoreNonCompile>true</ignoreNonCompile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M3</version>
+                    <configuration>
+                        <fail>false</fail>
+                        <rules>
+                            <banDuplicatePomDependencyVersions />
+                            <dependencyConvergence />
+                            <requireJavaVersion>
+                                <version>${version.jdk}</version>
+                            </requireJavaVersion>
+                            <requireMavenVersion>
+                                <version>${version.maven}</version>
+                            </requireMavenVersion>
+                            <requirePluginVersions />
+                            <requireSameVersionsReactor />
+                            <requireUpperBoundDeps />
+                        </rules>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>extra-enforcer-rules</artifactId>
+                            <version>1.5.1</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>apply-enforcement-rules</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <skipIfEmpty>true</skipIfEmpty>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Implementation-Title>${project.name}</Implementation-Title>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                                <Implementation-Version>${project.version}.${build.number}.${build.revision}</Implementation-Version>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>create-test-jar</id>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <!-- All relevant doclint checks are performed during
+                        the compilation phase; no need to recheck during
+                        Javadoc generation. -->
+                        <doclint>none</doclint>
+                        <source>${version.jdk}</source>
                         <!-- XXX: The `jooq-codegen-maven` plugin
                         unconditionally registers the directory in which it
                         generates code as a (main) compile source root. But in
@@ -227,14 +578,53 @@
                         code, so we must take care to exclude it during the
                         Javadoc generation process. Flag this issue with jOOQ
                         to get it resolved. -->
-                        <sourcepath>
-                            ${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations
-                        </sourcepath>
+                        <sourcepath>${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations</sourcepath>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>generate-javadoc-jar</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <phase>verify</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>${version.maven-plugin-tools}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <releaseProfiles>release</releaseProfiles>
+                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <useReleaseProfile>false</useReleaseProfile>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <delimiters>
+                            <delimiter>@</delimiter>
+                        </delimiters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.9.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
                     <configuration>
                         <!-- XXX: The `jooq-codegen-maven` plugin
                         unconditionally registers the directory in which it
@@ -249,12 +639,176 @@
                             <include>**/jolo/*.java</include>
                         </includes>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>generate-source-jar</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                            <phase>verify</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version.surefire}</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*Test.java</include>
+                        </includes>
+                        <!-- Timing measurements indicate that it's generally
+                        not beneficial to perform method-level parallelization
+                        for unit tests. -->
+                        <parallel>classes</parallel>
+                        <trimStackTrace>false</trimStackTrace>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>1.4</version>
+                    <configuration>
+                        <buildNumberPropertyName>build.revision</buildNumberPropertyName>
+                        <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>determine-build-number</id>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                            <phase>validate</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.0.0</version>
+                    <configuration>
+                        <!-- Nearly no projects ship a "missing third party
+                        licenses" file. Since the operation of attempting to
+                        retrieve these files is very slow, we have decided to
+                        disable this functionality at this time. -->
+                        <useRepositoryMissingFiles>false</useRepositoryMissingFiles>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>tidy-maven-plugin</artifactId>
+                    <version>1.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.gaul</groupId>
+                    <artifactId>modernizer-maven-plugin</artifactId>
+                    <version>2.3.0</version>
+                    <configuration>
+                        <exclusionPatterns>
+                            <!-- The plugin suggests replacing Guava's
+                            immutable collection factory methods with
+                            `java.util.{List,Map,Set}.{copyOf,of}`, but those
+                            methods don't allow one to convey immutability at
+                            the type system level. -->
+                            <exclusionPattern>com/google/common/collect/Immutable(List|Map|Set)\.(copyOf|of):.*</exclusionPattern>
+                            <!-- The plugin suggests replacing usages of
+                            Guava's `Iterables` class with
+                            `java.util.stream.Stream` equivalents, but the
+                            alternative is often more verbose, requiring
+                            unnecessary conversions to and from streams. -->
+                            <exclusionPattern>com/google/common/collect/Iterables\..*</exclusionPattern>
+                        </exclusionPatterns>
+                        <failOnViolations>false</failOnViolations>
+                        <javaVersion>${version.jdk}</javaVersion>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>modernize</id>
+                            <goals>
+                                <goal>modernizer</goal>
+                            </goals>
+                            <phase>process-test-classes</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jooq</groupId>
+                    <artifactId>jooq-codegen-maven</artifactId>
+                    <version>${version.jooq}</version>
+                    <configuration>
+                        <generator>
+                            <generate>
+                                <javaTimeTypes>true</javaTimeTypes>
+                            </generate>
+                        </generator>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.jooq</groupId>
+                            <artifactId>jooq-meta-extensions</artifactId>
+                            <version>${version.jooq}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.postgresql</groupId>
+                            <artifactId>postgresql</artifactId>
+                            <version>${version.postgresql}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.pitest</groupId>
+                    <artifactId>pitest-maven</artifactId>
+                    <version>1.7.2</version>
+                    <configuration>
+                        <mutators>
+                            <mutator>ALL</mutator>
+                        </mutators>
+                        <!-- Use multple threads to speed things up. Extend
+                        timeouts to prevent false positives as a result of
+                        contention. -->
+                        <threads>4</threads>
+                        <timeoutFactor>4</timeoutFactor>
+                        <timestampedReports>false</timestampedReports>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.pitest</groupId>
+                            <artifactId>pitest-junit5-plugin</artifactId>
+                            <version>0.15</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>compute-mutation-coverage</id>
+                            <goals>
+                                <goal>mutationCoverage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
-                <!-- XXX: We require this plugin execution only because there
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin><!-- XXX: We require this plugin execution only because there
                 is no way to tell the `jooq-codegen-maven` that it generates
                 _test_ code. File an issue with jOOQ to discuss improving this.
                 (See also the `maven-javadoc-plugin` and `maven-source-plugin`
@@ -264,10 +818,10 @@
                 <executions>
                     <execution>
                         <id>add-test-sources</id>
-                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
                         </goals>
+                        <phase>generate-test-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-test-sources/jooq</source>
@@ -277,16 +831,12 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <generator>
                         <database>
@@ -302,8 +852,7 @@
                                     <userType>Long[]</userType>
                                     <includeExpression>.*\.RELATEDFOOIDS</includeExpression>
                                     <converter>org.jooq.Converter.ofNullable(Object[].class, Long[].class, i -&gt;
-                                        (Long[])i, i -&gt; i)
-                                    </converter>
+                                        (Long[])i, i -&gt; i)</converter>
                                 </forcedType>
                             </forcedTypes>
                         </database>
@@ -316,7 +865,343 @@
                         </target>
                     </generator>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <!-- If explicitly enabled using `-Pcoverage` we use PIT to
+            establish coverage through mutation testing. -->
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- If explicitly enabled using `-Pformat` the source code is
+            formatted. -->
+            <id>format</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.coveo</groupId>
+                        <artifactId>fmt-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- By default we verify various aspects of a module and the
+            artifact(s) it produces. We define these checks in a profile so
+            that they can be disabled during development. See also the
+            `error-prone` profile defined below. -->
+            <id>build-checks</id>
+            <activation>
+                <property>
+                    <name>!verification.skip</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.coveo</groupId>
+                        <artifactId>fmt-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>check-source-format</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.github.ekryd.sortpom</groupId>
+                        <artifactId>sortpom-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <annotationProcessorPaths combine.children="append">
+                                <path>
+                                    <groupId>com.google.guava</groupId>
+                                    <artifactId>guava-beta-checker</artifactId>
+                                    <version>${version.guava-beta-checker}</version>
+                                </path>
+                                <path>
+                                    <groupId>com.uber.nullaway</groupId>
+                                    <artifactId>nullaway</artifactId>
+                                    <version>${version.nullaway}</version>
+                                </path>
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_annotations</artifactId>
+                                    <version>${version.error-prone}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                            <compilerArgs combine.children="append">
+                                <!-- We enable nearly all doclint checks,
+                                except that we don't care about missing Javadoc. -->
+                                <!-- XXX: For OSS code, consider requiring
+                                Javadoc on public classes and members; in that
+                                case pass `-missing/package`. -->
+                                <arg>-Xdoclint:all,-missing</arg>
+                                <arg>-Xlint:all</arg>
+                                <!-- The annotation processors do not handle
+                                all annotations present on the classpath, and
+                                javac complains about this. See
+                                https://bugs.openjdk.java.net/browse/JDK-6999068. -->
+                                <arg>-Xlint:-processing</arg>
+                            </compilerArgs>
+                            <showWarnings>true</showWarnings>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>analyze-dependencies</id>
+                                <goals>
+                                    <goal>analyze-dep-mgt</goal>
+                                    <goal>analyze-duplicate</goal>
+                                    <goal>analyze-only</goal>
+                                </goals>
+                                <phase>process-test-classes</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>check-third-party-licenses</id>
+                                <goals>
+                                    <goal>add-third-party</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.gaul</groupId>
+                        <artifactId>modernizer-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- An extension of the `build-checks` profile which configures
+            Error Prone. This configuration is defined in a separate profile so
+            that it can be combined with the `patch` profile below, without
+            introducing the overhead of other build checks. -->
+            <id>error-prone</id>
+            <activation>
+                <property>
+                    <name>!verification.skip</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <annotationProcessorPaths combine.children="append">
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_core</artifactId>
+                                    <version>${version.error-prone}</version>
+                                </path>
+                                <path>
+                                    <groupId>org.mockito</groupId>
+                                    <artifactId>mockito-errorprone</artifactId>
+                                    <version>${version.mockito}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                            <showWarnings>true</showWarnings>
+                            <compilerArgs>
+                                <!-- Enable and configure Error Prone. -->
+                                <arg>
+                                    -Xplugin:ErrorProne
+                                    -XepAllErrorsAsWarnings
+                                    -XepAllDisabledChecksAsWarnings
+                                    -XepDisableWarningsInGeneratedCode
+                                    -XepExcludedPaths:${project.build.directory}/.*
+                                    -Xep:AndroidJdkLibsChecker:OFF
+                                    -Xep:Java7ApiChecker:OFF
+                                    -Xep:Java8ApiChecker:OFF
+                                    -XepOpt:NullAway:AnnotatedPackages=tech.picnic
+                                    -XepOpt:NullAway:AssertsEnabled=true
+                                    <!-- Append additional custom arguments.-->
+                                    ${error-prone.args}
+                                </arg>
+                                <arg>-XDcompilePolicy=simple</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- If combined with the `error-prone` profile above, this profile
+            configures Error Prone to try and automatically fix (rather than
+            merely flag) bug pattern violations in the source code. -->
+            <id>patch</id>
+            <activation>
+                <property>
+                    <name>errorprone.patchchecks</name>
+                </property>
+            </activation>
+            <properties>
+                <error-prone.args>-XepPatchChecks:${errorprone.patchchecks} -XepPatchLocation:IN_PLACE</error-prone.args>
+            </properties>
+        </profile>
+        <profile>
+            <!-- The `build-checks` and `error-prone` profiles enable a whole
+            bunch of additional compile checks. By default those warnings break
+            the build. This profile allows one to collect all build warnings
+            without failing the build. -->
+            <id>disallow-warnings</id>
+            <activation>
+                <property>
+                    <name>!verification.warn</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>com.github.ekryd.sortpom</groupId>
+                            <artifactId>sortpom-maven-plugin</artifactId>
+                            <configuration>
+                                <verifyFail>stop</verifyFail>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-checkstyle-plugin</artifactId>
+                            <configuration>
+                                <failOnViolation>true</failOnViolation>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <configuration>
+                                <compilerArgs combine.children="append">
+                                    <!-- When using a JDK other than the one
+                                    specified using `-source`, `javac` warns
+                                    that the bootstrap classpath will not be
+                                    set. We don't want to fail on that warning. -->
+                                    <arg>-Xlint:-options</arg>
+                                </compilerArgs>
+                                <failOnWarning>true</failOnWarning>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-dependency-plugin</artifactId>
+                            <configuration>
+                                <failBuild>true</failBuild>
+                                <failOnWarning>true</failOnWarning>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-enforcer-plugin</artifactId>
+                            <configuration>
+                                <fail>true</fail>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>license-maven-plugin</artifactId>
+                            <configuration>
+                                <failOnBlacklist>true</failOnBlacklist>
+                                <failOnMissing>true</failOnMissing>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.gaul</groupId>
+                            <artifactId>modernizer-maven-plugin</artifactId>
+                            <configuration>
+                                <failOnViolations>true</failOnViolations>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <!-- A counterpart to the `disallow-warnings` profile which
+            explicitly "tones down" plugins enabled by the `build-checks`
+            profile. Necessary for dealing with plugins that default to failing
+            the build upon encountering a violation. -->
+            <id>avoid-errors</id>
+            <activation>
+                <property>
+                    <name>verification.warn</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>com.coveo</groupId>
+                            <artifactId>fmt-maven-plugin</artifactId>
+                            <configuration>
+                                <skip>true</skip>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <!-- This profile is auto-activated when performing a release. -->
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                    <!-- Lexicographically this plugin is listed out-of-order
+                    because it must be executed after the
+                    `maven-javadoc-plugin`; otherwise not all artifacts will be
+                    signed. -->
+                    <?SORTPOM IGNORE?>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <?SORTPOM RESUME?>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

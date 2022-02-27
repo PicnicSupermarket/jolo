@@ -57,6 +57,7 @@ final class TestUtil {
     record.set(field, field.getType().cast(value));
   }
 
+  @SuppressWarnings("FieldCanBeFinal")
   public static final class FooEntity {
     private final Multiset<FooEntity> other = HashMultiset.create();
     private final long id;

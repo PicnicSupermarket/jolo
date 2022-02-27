@@ -1,9 +1,9 @@
 package tech.picnic.jolo;
 
 import static tech.picnic.jolo.TestUtil.createRecord;
-import static tech.picnic.jolo.data.schema.Tables.BAR;
-import static tech.picnic.jolo.data.schema.Tables.FOO;
-import static tech.picnic.jolo.data.schema.Tables.FOOBAR;
+import static tech.picnic.jolo.data.schema.base.Tables.BAR;
+import static tech.picnic.jolo.data.schema.base.Tables.FOO;
+import static tech.picnic.jolo.data.schema.base.Tables.FOOBAR;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -30,6 +30,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.VerboseMode;
 
+@SuppressWarnings("checkstyle:designforextension")
 public class TestBenchmark {
 
   @State(Scope.Benchmark)
@@ -37,7 +38,10 @@ public class TestBenchmark {
     @Param({"100", "1000", "100000"})
     public int numRecords;
 
+    @SuppressWarnings("NullAway")
     List<Record> records;
+
+    @SuppressWarnings("NullAway")
     LoaderFactory<TestUtil.FooEntity> loaderFactory;
 
     @Setup(Level.Trial)

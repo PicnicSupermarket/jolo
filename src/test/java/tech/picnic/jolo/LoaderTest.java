@@ -4,10 +4,10 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tech.picnic.jolo.TestUtil.createRecord;
-import static tech.picnic.jolo.data.schema.Tables.BAR;
-import static tech.picnic.jolo.data.schema.Tables.BAZ;
-import static tech.picnic.jolo.data.schema.Tables.FOO;
-import static tech.picnic.jolo.data.schema.Tables.FOOBAR;
+import static tech.picnic.jolo.data.schema.base.Tables.BAR;
+import static tech.picnic.jolo.data.schema.base.Tables.BAZ;
+import static tech.picnic.jolo.data.schema.base.Tables.FOO;
+import static tech.picnic.jolo.data.schema.base.Tables.FOOBAR;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 import tech.picnic.jolo.TestUtil.BarEntity;
 import tech.picnic.jolo.TestUtil.BazEntity;
 import tech.picnic.jolo.TestUtil.FooEntity;
-import tech.picnic.jolo.data.schema.tables.Bar;
-import tech.picnic.jolo.data.schema.tables.Foo;
+import tech.picnic.jolo.data.schema.base.tables.Bar;
+import tech.picnic.jolo.data.schema.base.tables.Foo;
 
 public final class LoaderTest {
   @Test

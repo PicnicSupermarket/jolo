@@ -37,6 +37,7 @@ import org.jooq.RecordHandler;
  * initialisation a number of validations are performed. Initialising at application start-up
  * therefore makes it possible to detect any misconfiguration before the query is first executed.
  */
+@SuppressWarnings({"removal", "ImmutableMemberCollection"})
 public final class Loader<T> implements RecordHandler<Record> {
   private final Entity<T, ?> mainEntity;
   private final Set<Entity<?, ?>> entities;

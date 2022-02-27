@@ -111,6 +111,7 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
     return relation(left, right).manyToMany(leftKey, rightKey);
   }
 
+  @SuppressWarnings("NullAway")
   private static <L extends Record, R extends Record> TableField<?, Long> getForeignKeySymmetric(
       Table<L> left, Table<R> right) {
     TableField<?, Long> leftKey = getOptionalForeignKey(right, left).orElse(null);
