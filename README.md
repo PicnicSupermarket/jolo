@@ -46,12 +46,14 @@ dependencies {
 - Supports circular references.
 - Supports adding extra (non-table) fields to entities.
 
-## Limitations
+## Limitations/Potential improvements
 
 - Only primary / foreign keys of (Java) type `long` are supported. We have no intention to support composite foreign
   keys for the time being. For keys of different types (e.g.  `String`) we would accept pull requests, but only if this
   does not further complicate the interface of the library (no long type parameter lists).
 - Relation mapping does not work yet for entities that are not based on a table in the DB schema.
+- Implement stricter builder pattern for loader definition.
+- Investigate nullness, @CheckReturnValue and @Contract annotations
 
 ## Example usage
 

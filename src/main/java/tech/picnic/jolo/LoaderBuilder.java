@@ -11,9 +11,9 @@ public interface LoaderBuilder<T> {
 
   /**
    * Specifies that there is a relation between two entities. The entities that are passed in are
-   * automatically deserialised by the loaders created by {@link LoaderBuilder#build()}.
-   * This method returns a builder that allows you to specify further details about the relation,
-   * and about how it is loaded.
+   * automatically deserialised by the loaders created by {@link LoaderBuilder#build()}. This method
+   * returns a builder that allows you to specify further details about the relation, and about how
+   * it is loaded.
    */
   <L, R> RelationBuilder<T, L, R> relation(Entity<L, ?> left, Entity<R, ?> right);
 

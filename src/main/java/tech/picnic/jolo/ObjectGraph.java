@@ -147,6 +147,7 @@ final class ObjectGraph {
         .toString();
   }
 
+  @SuppressWarnings("NullAway")
   private static <E> E getObject(Entity<E, ?> entity, Map<Long, E> objectsById, Long id) {
     E result = objectsById.get(id);
     validate(result != null, "Unknown id requested from table %s: %s", entity, id);

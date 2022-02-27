@@ -109,14 +109,22 @@ final class Relation<L, R> {
         (object, successors) -> {
           validate(
               successors.size() <= 1,
-              "N-to-1 relation between %s (%s) and %s (%s) contains conflicting tuples",
+              "N-to-1 relation between %s (%s) and %s (%s) contains conflicting tuples. "
+                  + "Encountered more than one entity candidate for a given entity on the left side. "
+                  + "Please verify that the query result's rows abide by the loader definition.",
               left,
               leftArity,
               right,
               rightArity);
-          if (successors.isEmpty()) {
-            throw new IllegalArgumentException();
-          }
+          validate(
+              !successors.isEmpty(),
+              "N-to-1 relation between %s (%s) and %s (%s) contains conflicting tuples. "
+                  + "Encountered no entity candidate for a given entity on the left side. "
+                  + "Please verify that the query result's rows abide by the loader definition.",
+              left,
+              leftArity,
+              right,
+              rightArity);
           setter.accept(object, successors.get(0));
         });
   }
@@ -127,13 +135,15 @@ final class Relation<L, R> {
         (object, successors) -> {
           validate(
               successors.size() <= 1,
-              "N-to-1 relation between %s (%s) and %s (%s) contains conflicting tuples",
+              "N-to-0..1 relation between %s (%s) and %s (%s) contains conflicting tuples. "
+                  + "Encountered more than one entity candidate for a given entity on the left side. "
+                  + "Please verify that the query result's rows abide by the loader definition.",
               left,
               leftArity,
               right,
               rightArity);
           setter.accept(
-              object, (successors.isEmpty()) ? Optional.empty() : Optional.of(successors.get(0)));
+              object, successors.isEmpty() ? Optional.empty() : Optional.of(successors.get(0)));
         });
   }
 

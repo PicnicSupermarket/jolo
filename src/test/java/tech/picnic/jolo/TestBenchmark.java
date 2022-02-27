@@ -1,5 +1,6 @@
 package tech.picnic.jolo;
 
+import static tech.picnic.jolo.Loader.toLinkedObjectsWith;
 import static tech.picnic.jolo.TestUtil.createRecord;
 import static tech.picnic.jolo.data.schema.base.Tables.BAR;
 import static tech.picnic.jolo.data.schema.base.Tables.FOO;
@@ -42,14 +43,14 @@ public class TestBenchmark {
     List<Record> records;
 
     @SuppressWarnings("NullAway")
-    LoaderFactory<TestUtil.FooEntity> loaderFactory;
+    Loader<TestUtil.FooEntity> loader;
 
     @Setup(Level.Trial)
     public void initializeLoader() {
       Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
       Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
-      loaderFactory =
-          LoaderFactory.create(foo)
+      loader =
+          Loader.of(foo)
               .manyToMany(foo, bar, FOOBAR)
               .setManyLeft(TestUtil.FooEntity::setBarList)
               .setManyRight(TestUtil.BarEntity::setFooList)
@@ -86,9 +87,8 @@ public class TestBenchmark {
   @Measurement(iterations = 20, time = 1)
   @OutputTimeUnit(TimeUnit.MICROSECONDS)
   public void benchmark(BenchmarkState state, Blackhole hole) {
-    Loader<TestUtil.FooEntity> loader = state.loaderFactory.newLoader();
-    state.records.forEach(loader::next);
-    List<TestUtil.FooEntity> objects = loader.getList();
+    List<TestUtil.FooEntity> objects =
+        state.records.stream().collect(toLinkedObjectsWith(state.loader));
     hole.consume(objects);
   }
 

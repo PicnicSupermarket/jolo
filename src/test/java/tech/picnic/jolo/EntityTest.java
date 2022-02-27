@@ -35,7 +35,9 @@ public final class EntityTest {
   @Test
   public void testLoad() {
     Entity<FooEntity, FooRecord> aEntity = new Entity<>(FOO, FooEntity.class);
-    FooEntity object = aEntity.load(new FooRecord(1L, 1, null));
+    @SuppressWarnings("NullAway")
+    FooRecord fooRecord = new FooRecord(1L, 1, null);
+    FooEntity object = aEntity.load(fooRecord);
     assertEquals(new FooEntity(1L, 1, null), object);
   }
 

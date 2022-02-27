@@ -97,8 +97,7 @@ public final class LoaderTest {
   public void testEncounterOrder() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
-        Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
+    Loader<BarEntity> l = Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -134,8 +133,7 @@ public final class LoaderTest {
   public void testOneToOne() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
-        Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
+    Loader<BarEntity> l = Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -309,10 +307,7 @@ public final class LoaderTest {
   public void testZeroOrOneToManyRecursiveReference() {
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
     Loader<BarEntity> l =
-        Loader.of(bar)
-            .zeroOrOneToMany(bar, bar)
-            .setZeroOrOneRight(BarEntity::setOtherBar)
-            .build();
+        Loader.of(bar).zeroOrOneToMany(bar, bar).setZeroOrOneRight(BarEntity::setOtherBar).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -335,8 +330,7 @@ public final class LoaderTest {
   public void testNToOneThrowsIfManyAreFound() {
     Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
     Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
-        Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
+    Loader<BarEntity> l = Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();

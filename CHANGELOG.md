@@ -21,6 +21,8 @@ requiring JDK v11+ and Jooq v3.15+ and dropping multiple public methods:
 - Remove `Loader#next(Record record)`, `Loader#get()`, `Loader#stream()`, `Loader#getSet()`, `Loader#getList()`
   , `Loader#getOne()`, `Loader#getOptional()`, `Loader#collect(Collector<? super T, A, R> collector)`.
 - Custom relation loaders have to implement `Function<Record, Set<IdPair>`.
+- Add additional validation to cover missing entity candidates for the right side of an N-to-1 relation.
+- Provide improved validation failure messages.
 
 ## v0.0.2
 
