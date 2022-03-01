@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>tech.picnic.jolo</groupId>
@@ -68,7 +69,7 @@
         <build.number>LOCAL</build.number>
         <!-- Property using which additional Error Prone flags can be
         specified. Used by the `patch` profile to enable patching. -->
-        <error-prone.args />
+        <error-prone.args/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.auto-service>1.0</version.auto-service>
         <version.error-prone>2.10.0</version.error-prone>
@@ -224,7 +225,7 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${version.jmh}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -277,122 +278,10 @@
                         <testSourceDirectories>
                             <testSourceDirectory>${project.build.testSourceDirectory}</testSourceDirectory>
                         </testSourceDirectories>
-                        <checkstyleRules>
-                            <!-- We only enable rules that are not enforced by
-                            Error Prone or automatically corrected through
-                            application of google-java-format. -->
-                            <module name="Checker">
-                                <module name="SuppressWarningsFilter" />
-                                <module name="TreeWalker">
-                                    <module name="AnnotationUseStyle">
-                                        <!-- XXX: Right now this check doesn't
-                                        completely enforce the desired style.
-                                        See https://github.com/checkstyle/checkstyle/issues/4972;
-                                        we're looking for the proposed `compact
-                                        = ALWAYS` and `singleArrayCurlies =
-                                        NEVER` style. -->
-                                    </module>
-                                    <module name="DeclarationOrder">
-                                        <!-- We don't enforce sorting fields by
-                                        their visibility modifier, for two
-                                        reasons:
-                                        - During (class) initialization
-                                          declaration order matters. Though the
-                                          plugin does not warn about fields
-                                          with obvious dependencies, its
-                                          dependency analysis is necessarily
-                                          incomplete; NPEs may result if some
-                                          of its advice is followed.
-                                        - Sometimes a field is annotated
-                                          `@VisibleForTesting`. It may then be
-                                          preferable not to reorder. The plugin
-                                          does not current respect this
-                                          annotation. -->
-                                        <property name="ignoreModifiers" value="true" />
-                                    </module>
-                                    <module name="DefaultComesLast" />
-                                    <module name="DesignForExtension" />
-                                    <module name="EmptyBlock" />
-                                    <module name="EmptyCatchBlock" />
-                                    <module name="EmptyStatement" />
-                                    <module name="FinalClass" />
-                                    <module name="HiddenFieldCheck">
-                                        <property name="ignoreConstructorParameter" value="true" />
-                                        <property name="ignoreSetter" value="true" />
-                                        <property name="setterCanReturnItsClass" value="true" />
-                                    </module>
-                                    <module name="IllegalImport">
-                                        <property name="illegalClasses" value="javax.annotation.concurrent.Immutable">
-                                            <!-- Instead, please use
-                                            `com.google.errorprone.annotations.Immutable`. -->
-                                        </property>
-                                        <property name="illegalClasses" value="javax.xml.bind.DatatypeConverter" />
-                                        <property name="illegalClasses" value="org.springframework.context.annotation.ComponentScan">
-                                            <!-- Instead, please explicitly
-                                            `@Import` the components. -->
-                                        </property>
-                                        <property name="illegalPkgs" value="com.amazonaws.annotation" />
-                                        <property name="illegalPkgs" value="com.beust.jcommander.internal" />
-                                        <property name="illegalPkgs" value="com.google.api.client.repackaged" />
-                                        <property name="illegalPkgs" value="com.newrelic.agent.deps" />
-                                        <property name="illegalPkgs" value="jdk" />
-                                        <property name="illegalPkgs" value="jersey.repackaged" />
-                                        <property name="illegalPkgs" value="nl.jqno.equalsverifier.internal" />
-                                        <property name="illegalPkgs" value="org.apache.commons.lang3">
-                                            <!-- Instead, please use Guava or a
-                                            custom helper method. -->
-                                        </property>
-                                        <property name="illegalPkgs" value="org.immutables.value.internal" />
-                                        <property name="illegalPkgs" value="org.mutabilitydetector.internal" />
-                                    </module>
-                                    <module name="IllegalImport">
-                                        <!-- XXX: This config uses
-                                        regexes so as to disallow static
-                                        imports. Once `illegalClasses`
-                                        disallows static imports by default,
-                                        this config can be merged into the one
-                                        above. See
-                                        https://github.com/checkstyle/checkstyle/issues/4954. -->
-                                        <property name="illegalClasses" value="org\.testng\.AssertJUnit(\..*?)?" />
-                                        <property name="regexp" value="true" />
-                                    </module>
-                                    <module name="IllegalCatch" />
-                                    <module name="IllegalThrows" />
-                                    <module name="InnerAssignment" />
-                                    <module name="InvalidJavadocPosition" />
-                                    <module name="MissingDeprecated" />
-                                    <module name="MutableException" />
-                                    <module name="NeedBraces" />
-                                    <module name="NoClone" />
-                                    <module name="NoFinalizer" />
-                                    <module name="PackageDeclaration" />
-                                    <module name="ParameterAssignment" />
-                                    <module name="RedundantModifier" />
-                                    <module name="SimplifyBooleanExpression" />
-                                    <module name="SimplifyBooleanReturn" />
-                                    <module name="SuppressWarningsHolder" />
-                                    <module name="TrailingComment" />
-                                    <module name="WriteTag">
-                                        <property name="tag" value="@author" />
-                                        <property name="tagFormat" value="\S" />
-                                        <property name="tagSeverity" value="error" />
-                                        <property name="severity" value="ignore" />
-                                    </module>
-                                    <module name="UnnecessaryParentheses" />
-                                    <module name="UnnecessarySemicolonInEnumeration" />
-                                    <module name="UnnecessarySemicolonInTryWithResources" />
-                                    <module name="UnusedImports">
-                                        <!-- Error-prone also detects these,
-                                        but (currently) doesn't warn about
-                                        JavaDoc-only imports. -->
-                                    </module>
-                                </module>
-                                <module name="UniqueProperties" />
-                            </module>
-                        </checkstyleRules>
                         <excludes>**/data/**/schema/**/*</excludes>
                         <failOnViolation>false</failOnViolation>
                         <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <configLocation>google_checks.xml</configLocation>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -488,17 +377,17 @@
                     <configuration>
                         <fail>false</fail>
                         <rules>
-                            <banDuplicatePomDependencyVersions />
-                            <dependencyConvergence />
+                            <banDuplicatePomDependencyVersions/>
+                            <dependencyConvergence/>
                             <requireJavaVersion>
                                 <version>${version.jdk}</version>
                             </requireJavaVersion>
                             <requireMavenVersion>
                                 <version>${version.maven}</version>
                             </requireMavenVersion>
-                            <requirePluginVersions />
-                            <requireSameVersionsReactor />
-                            <requireUpperBoundDeps />
+                            <requirePluginVersions/>
+                            <requireSameVersionsReactor/>
+                            <requireUpperBoundDeps/>
                         </rules>
                     </configuration>
                     <dependencies>
@@ -548,7 +437,8 @@
                             <manifestEntries>
                                 <Implementation-Title>${project.name}</Implementation-Title>
                                 <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                                <Implementation-Version>${project.version}.${build.number}.${build.revision}</Implementation-Version>
+                                <Implementation-Version>${project.version}.${build.number}.${build.revision}
+                                </Implementation-Version>
                             </manifestEntries>
                         </archive>
                     </configuration>
@@ -566,10 +456,6 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.3.1</version>
                     <configuration>
-                        <!-- All relevant doclint checks are performed during
-                        the compilation phase; no need to recheck during
-                        Javadoc generation. -->
-                        <doclint>none</doclint>
                         <source>${version.jdk}</source>
                         <!-- XXX: The `jooq-codegen-maven` plugin
                         unconditionally registers the directory in which it
@@ -578,7 +464,9 @@
                         code, so we must take care to exclude it during the
                         Javadoc generation process. Flag this issue with jOOQ
                         to get it resolved. -->
-                        <sourcepath>${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations</sourcepath>
+                        <sourcepath>
+                            ${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations
+                        </sourcepath>
                     </configuration>
                     <executions>
                         <execution>
@@ -691,13 +579,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>2.0.0</version>
-                    <configuration>
-                        <!-- Nearly no projects ship a "missing third party
-                        licenses" file. Since the operation of attempting to
-                        retrieve these files is very slow, we have decided to
-                        disable this functionality at this time. -->
-                        <useRepositoryMissingFiles>false</useRepositoryMissingFiles>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -852,7 +733,8 @@
                                     <userType>Long[]</userType>
                                     <includeExpression>.*\.RELATEDFOOIDS</includeExpression>
                                     <converter>org.jooq.Converter.ofNullable(Object[].class, Long[].class, i -&gt;
-                                        (Long[])i, i -&gt; i)</converter>
+                                        (Long[])i, i -&gt; i)
+                                    </converter>
                                 </forcedType>
                             </forcedTypes>
                         </database>
@@ -879,36 +761,9 @@
 
     <profiles>
         <profile>
-            <!-- If explicitly enabled using `-Pcoverage` we use PIT to
-            establish coverage through mutation testing. -->
-            <id>coverage</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.pitest</groupId>
-                        <artifactId>pitest-maven</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- If explicitly enabled using `-Pformat` the source code is
-            formatted. -->
-            <id>format</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.coveo</groupId>
-                        <artifactId>fmt-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
             <!-- By default we verify various aspects of a module and the
             artifact(s) it produces. We define these checks in a profile so
-            that they can be disabled during development. See also the
-            `error-prone` profile defined below. -->
+            that they can be disabled during development. -->
             <id>build-checks</id>
             <activation>
                 <property>
@@ -957,6 +812,16 @@
                                     <artifactId>error_prone_annotations</artifactId>
                                     <version>${version.error-prone}</version>
                                 </path>
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_core</artifactId>
+                                    <version>${version.error-prone}</version>
+                                </path>
+                                <path>
+                                    <groupId>org.mockito</groupId>
+                                    <artifactId>mockito-errorprone</artifactId>
+                                    <version>${version.mockito}</version>
+                                </path>
                             </annotationProcessorPaths>
                             <compilerArgs combine.children="append">
                                 <!-- We enable nearly all doclint checks,
@@ -971,6 +836,22 @@
                                 javac complains about this. See
                                 https://bugs.openjdk.java.net/browse/JDK-6999068. -->
                                 <arg>-Xlint:-processing</arg>
+                                <!-- Enable and configure Error Prone. -->
+                                <arg>
+                                    -Xplugin:ErrorProne
+                                    -XepAllErrorsAsWarnings
+                                    -XepAllDisabledChecksAsWarnings
+                                    -XepDisableWarningsInGeneratedCode
+                                    -XepExcludedPaths:${project.build.directory}/.*
+                                    -Xep:AndroidJdkLibsChecker:OFF
+                                    -Xep:Java7ApiChecker:OFF
+                                    -Xep:Java8ApiChecker:OFF
+                                    -XepOpt:NullAway:AnnotatedPackages=tech.picnic
+                                    -XepOpt:NullAway:AssertsEnabled=true
+                                    <!-- Append additional custom arguments.-->
+                                    ${error-prone.args}
+                                </arg>
+                                <arg>-XDcompilePolicy=simple</arg>
                             </compilerArgs>
                             <showWarnings>true</showWarnings>
                         </configuration>
@@ -1014,60 +895,7 @@
             </build>
         </profile>
         <profile>
-            <!-- An extension of the `build-checks` profile which configures
-            Error Prone. This configuration is defined in a separate profile so
-            that it can be combined with the `patch` profile below, without
-            introducing the overhead of other build checks. -->
-            <id>error-prone</id>
-            <activation>
-                <property>
-                    <name>!verification.skip</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <annotationProcessorPaths combine.children="append">
-                                <path>
-                                    <groupId>com.google.errorprone</groupId>
-                                    <artifactId>error_prone_core</artifactId>
-                                    <version>${version.error-prone}</version>
-                                </path>
-                                <path>
-                                    <groupId>org.mockito</groupId>
-                                    <artifactId>mockito-errorprone</artifactId>
-                                    <version>${version.mockito}</version>
-                                </path>
-                            </annotationProcessorPaths>
-                            <showWarnings>true</showWarnings>
-                            <compilerArgs>
-                                <!-- Enable and configure Error Prone. -->
-                                <arg>
-                                    -Xplugin:ErrorProne
-                                    -XepAllErrorsAsWarnings
-                                    -XepAllDisabledChecksAsWarnings
-                                    -XepDisableWarningsInGeneratedCode
-                                    -XepExcludedPaths:${project.build.directory}/.*
-                                    -Xep:AndroidJdkLibsChecker:OFF
-                                    -Xep:Java7ApiChecker:OFF
-                                    -Xep:Java8ApiChecker:OFF
-                                    -XepOpt:NullAway:AnnotatedPackages=tech.picnic
-                                    -XepOpt:NullAway:AssertsEnabled=true
-                                    <!-- Append additional custom arguments.-->
-                                    ${error-prone.args}
-                                </arg>
-                                <arg>-XDcompilePolicy=simple</arg>
-                            </compilerArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- If combined with the `error-prone` profile above, this profile
+            <!-- If combined with the `build-checks` profile above, this profile
             configures Error Prone to try and automatically fix (rather than
             merely flag) bug pattern violations in the source code. -->
             <id>patch</id>
@@ -1081,10 +909,10 @@
             </properties>
         </profile>
         <profile>
-            <!-- The `build-checks` and `error-prone` profiles enable a whole
+            <!-- The `build-checks` profile enable a whole
             bunch of additional compile checks. By default those warnings break
             the build. This profile allows one to collect all build warnings
-            without failing the build. -->
+            without failing the build. Useful during development. -->
             <id>disallow-warnings</id>
             <activation>
                 <property>
@@ -1150,31 +978,6 @@
                             <artifactId>modernizer-maven-plugin</artifactId>
                             <configuration>
                                 <failOnViolations>true</failOnViolations>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <!-- A counterpart to the `disallow-warnings` profile which
-            explicitly "tones down" plugins enabled by the `build-checks`
-            profile. Necessary for dealing with plugins that default to failing
-            the build upon encountering a violation. -->
-            <id>avoid-errors</id>
-            <activation>
-                <property>
-                    <name>verification.warn</name>
-                </property>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>com.coveo</groupId>
-                            <artifactId>fmt-maven-plugin</artifactId>
-                            <configuration>
-                                <skip>true</skip>
                             </configuration>
                         </plugin>
                     </plugins>
