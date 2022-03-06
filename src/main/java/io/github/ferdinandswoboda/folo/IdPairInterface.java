@@ -1,4 +1,4 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 import org.immutables.value.Value;
 

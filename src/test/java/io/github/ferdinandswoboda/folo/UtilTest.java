@@ -1,14 +1,14 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.FOO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tech.picnic.jolo.data.schema.base.Tables.FOO;
 
+import io.github.ferdinandswoboda.folo.data.schema.other.Tables;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
-import tech.picnic.jolo.data.schema.other.Tables;
 
 public final class UtilTest {
   @Test

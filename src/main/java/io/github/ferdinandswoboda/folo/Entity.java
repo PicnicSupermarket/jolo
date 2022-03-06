@@ -1,8 +1,7 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Stream.concat;
-import static tech.picnic.jolo.Util.validate;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -132,7 +131,7 @@ public final class Entity<T, R extends Record> {
        * usage scenario this object will only ever be used with the same query, and therefore
        * we will always retrieve records with the same set of columns.
        */
-      validate(
+      Util.validate(
           primaryKey.equals(record.field(primaryKey)),
           "Primary key column %s not found in result record",
           primaryKey);

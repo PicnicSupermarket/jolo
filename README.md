@@ -1,4 +1,4 @@
-# Jolo
+# Folo
 
 [![Build Status][travisci-badge]][travisci-builds]
 [![Maven Central][maven-central-badge]][maven-central-browse]
@@ -10,8 +10,6 @@
 
 Short for _jOOQ Loader_. A utility library to add basic object-relation mapping to your [jOOQ][jooq] code.
 
-![Picnic-jolo][jolo-image]
-
 ## How to Install
 
 Artifacts are hosted on [Maven's Central Repository][maven-central-browse]:
@@ -20,7 +18,7 @@ Artifacts are hosted on [Maven's Central Repository][maven-central-browse]:
 
 ```groovy
 dependencies {
-  compile 'tech.picnic.jolo:jolo:0.0.3'
+  compile 'io.github.ferdinandswoboda.folo:folo:1.0.0'
 }
 ```
 
@@ -29,9 +27,9 @@ dependencies {
 ```xml
 
 <dependency>
-  <groupId>tech.picnic.jolo</groupId>
-  <artifactId>jolo</artifactId>
-  <version>0.0.3</version>
+  <groupId>io.github.ferdinandswoboda.folo</groupId>
+  <artifactId>folo</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -149,14 +147,11 @@ When submitting changes, please make every effort to follow existing conventions
 readable as possible. New code must be covered by tests. As a rule of thumb, overall test coverage should not
 decrease. (There are exceptions to this rule, e.g. when more code is deleted than added.)
 
-[bettercodehub-badge]: https://bettercodehub.com/edge/badge/PicnicSupermarket/jolo?branch=master
-[bettercodehub-results]: https://bettercodehub.com/results/PicnicSupermarket/jolo
-[jolo-image]: https://i.imgur.com/MThi0ae.jpg
 [jooq]: https://www.jooq.org
 [maven-central-badge]: https://img.shields.io/maven-central/v/tech.picnic.jolo/jolo.svg
 [maven-central-browse]: https://repo1.maven.org/maven2/tech/picnic/jolo/
-[new-issue]: https://github.com/PicnicSupermarket/jolo/issues/new
-[new-pr]: https://github.com/PicnicSupermarket/jolo/compare
+[new-issue]: https://github.com/ferdinand-swoboda/folo/issues/new
+[new-pr]: https://github.com/ferdinand-swoboda/folo/compare
 [sonarcloud-badge-bugs]: https://sonarcloud.io/api/project_badges/measure?project=tech.picnic.jolo%3Ajolo&metric=bugs
 [sonarcloud-badge-maintainability]: https://sonarcloud.io/api/project_badges/measure?project=tech.picnic.jolo%3Ajolo&metric=sqale_rating
 [sonarcloud-badge-quality-gate]: https://sonarcloud.io/api/project_badges/measure?project=tech.picnic.jolo%3Ajolo&metric=alert_status
@@ -165,5 +160,5 @@ decrease. (There are exceptions to this rule, e.g. when more code is deleted tha
 [sonarcloud-measure-reliability]: https://sonarcloud.io/component_measures?id=tech.picnic.jolo%3Ajolo&metric=Reliability
 [sonarcloud-measure-security]: https://sonarcloud.io/component_measures?id=tech.picnic.jolo%3Ajolo&metric=Security
 [sonarcloud-measure-maintainability]: https://sonarcloud.io/component_measures?id=tech.picnic.jolo%3Ajolo&metric=Maintainability
-[travisci-badge]: https://travis-ci.org/PicnicSupermarket/jolo.svg?branch=master
-[travisci-builds]: https://travis-ci.org/PicnicSupermarket/jolo
+[travisci-badge]: https://travis-ci.org/ferdinand-swoboda/folo.svg?branch=master
+[travisci-builds]: https://travis-ci.org/ferdinand-swoboda/folo

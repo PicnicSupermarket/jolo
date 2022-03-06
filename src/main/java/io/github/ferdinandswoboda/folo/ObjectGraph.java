@@ -1,10 +1,9 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static tech.picnic.jolo.Util.validate;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -150,7 +149,7 @@ final class ObjectGraph {
   @SuppressWarnings("NullAway")
   private static <E> E getObject(Entity<E, ?> entity, Map<Long, E> objectsById, Long id) {
     E result = objectsById.get(id);
-    validate(result != null, "Unknown id requested from table %s: %s", entity, id);
+    Util.validate(result != null, "Unknown id requested from table %s: %s", entity, id);
     return result;
   }
 }

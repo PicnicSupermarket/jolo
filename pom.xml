@@ -3,66 +3,35 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tech.picnic.jolo</groupId>
-    <artifactId>jolo</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <groupId>io.github.ferdinandswoboda.folo</groupId>
+    <artifactId>folo</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
-    <name>Picnic :: Jolo</name>
+    <name>Folo</name>
     <description>A relational mapper for jOOQ.</description>
-    <url>https://github.com/PicnicSupermarket/jolo</url>
-    <inceptionYear>2019</inceptionYear>
+    <url>https://github.com/ferdinand-swoboda/folo</url>
+    <inceptionYear>2022</inceptionYear>
 
     <developers>
         <developer>
-            <name>Csaba Juhasz</name>
-            <email>csaba.juhasz@teampicnic.com</email>
-            <organization>Picnic Technologies BV</organization>
-            <timezone>Europe/Amsterdam</timezone>
-        </developer>
-        <developer>
-            <name>Ivan Babiankou</name>
-            <email>ivan.babiankou@teampicnic.com</email>
-            <organization>Picnic Technologies BV</organization>
-            <timezone>Europe/Amsterdam</timezone>
-        </developer>
-        <developer>
-            <name>Max Sumrall</name>
-            <email>max.sumrall@teampicnic.com</email>
-            <organization>Picnic Technologies BV</organization>
-            <timezone>Europe/Amsterdam</timezone>
-        </developer>
-        <developer>
-            <name>Prashant Julka</name>
-            <email>prashant.julka@teampicnic.com</email>
-            <organization>Picnic Technologies BV</organization>
-            <timezone>Europe/Amsterdam</timezone>
-        </developer>
-        <developer>
-            <name>Sjoerd Cranen</name>
-            <email>sjoerd.cranen@teampicnic.com</email>
-            <organization>Picnic Technologies BV</organization>
-            <timezone>Europe/Amsterdam</timezone>
-        </developer>
-        <developer>
-            <name>Stephan Schroevers</name>
-            <email>stephan.schroevers@teampicnic.com</email>
-            <organization>Picnic Technologies BV</organization>
+            <name>Ferdinand Swoboda</name>
+            <email>ferdinand.swoboda@googlemail.com</email>
             <timezone>Europe/Amsterdam</timezone>
         </developer>
     </developers>
 
     <scm>
-        <developerConnection>scm:git:git@github.com:PicnicSupermarket/jolo.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:ferdinand-swoboda/folo.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/PicnicSupermarket/jolo</url>
+        <url>https://github.com/ferdinand-swoboda/folo</url>
     </scm>
     <issueManagement>
         <system>Github</system>
-        <url>https://github.com/PicnicSupermarket/jolo/issues</url>
+        <url>https://github.com/ferdinand-swoboda/folo/issues</url>
     </issueManagement>
     <ciManagement>
-        <system>Travis CI</system>
-        <url>https://travis-ci.org/PicnicSupermarket/jolo</url>
+        <system>Github CI</system>
+        <url>https://github.com/ferdinand-swoboda/folo</url>
     </ciManagement>
 
     <properties>
@@ -742,7 +711,7 @@
                             <varargSetters>false</varargSetters>
                         </generate>
                         <target>
-                            <packageName>tech.picnic.jolo.data.schema</packageName>
+                            <packageName>io.github.ferdinandswoboda.folo.data.schema</packageName>
                             <directory>${project.build.directory}/generated-test-sources/jooq</directory>
                         </target>
                     </generator>
@@ -846,7 +815,7 @@
                                     -Xep:AndroidJdkLibsChecker:OFF
                                     -Xep:Java7ApiChecker:OFF
                                     -Xep:Java8ApiChecker:OFF
-                                    -XepOpt:NullAway:AnnotatedPackages=tech.picnic
+                                    -XepOpt:NullAway:AnnotatedPackages=io.github.ferdinandswoboda
                                     -XepOpt:NullAway:AssertsEnabled=true
                                     <!-- Append additional custom arguments.-->
                                     ${error-prone.args}
