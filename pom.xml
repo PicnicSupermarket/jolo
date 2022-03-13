@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.ferdinandswoboda.folo</groupId>
+    <groupId>io.github.ferdinand-swoboda.folo</groupId>
     <artifactId>folo</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
 
     <name>Folo</name>
-    <description>A relational mapper for jOOQ.</description>
+    <description>An object-relational mapper for jOOQ.</description>
     <url>https://github.com/ferdinand-swoboda/folo</url>
     <inceptionYear>2022</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
@@ -22,6 +29,7 @@
     </developers>
 
     <scm>
+        <connection>scm:git:git@github.com:ferdinand-swoboda/folo.git</connection>
         <developerConnection>scm:git:git@github.com:ferdinand-swoboda/folo.git</developerConnection>
         <tag>HEAD</tag>
         <url>https://github.com/ferdinand-swoboda/folo</url>
@@ -46,11 +54,11 @@
     </distributionManagement>
 
     <properties>
-        <build.number>LOCAL</build.number>
         <!-- Property using which additional Error Prone flags can be
         specified. Used by the `patch` profile to enable patching. -->
         <error-prone.args/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>LOCAL-SNAPSHOT</revision>
         <version.auto-service>1.0</version.auto-service>
         <version.error-prone>2.10.0</version.error-prone>
         <version.guava>31.0.1-jre</version.guava>
@@ -390,6 +398,14 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>3.0.1</version>
+                    <configuration>
+                        <!-- Prevent gpg from using pinentry programs. Fixes: gpg: signing
+                            failed: Inappropriate ioctl for device -->
+                        <gpgArguments>
+                            <arg>--pinentry-mode</arg>
+                            <arg>loopback</arg>
+                        </gpgArguments>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>sign-artifacts</id>
@@ -408,28 +424,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.2.0</version>
-                    <configuration>
-                        <skipIfEmpty>true</skipIfEmpty>
-                        <archive>
-                            <manifest>
-                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            </manifest>
-                            <manifestEntries>
-                                <Implementation-Title>${project.name}</Implementation-Title>
-                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                                <Implementation-Version>${project.version}.${build.number}.${build.revision}
-                                </Implementation-Version>
-                            </manifestEntries>
-                        </archive>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>create-test-jar</id>
-                            <goals>
-                                <goal>test-jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -444,9 +438,7 @@
                         code, so we must take care to exclude it during the
                         Javadoc generation process. Flag this issue with jOOQ
                         to get it resolved. -->
-                        <sourcepath>
-                            ${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations
-                        </sourcepath>
+                        <sourcepath>${project.basedir}/src/main/java:${project.build.directory}/generated-sources/annotations</sourcepath>
                     </configuration>
                     <executions>
                         <execution>
@@ -462,17 +454,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-plugin-plugin</artifactId>
                     <version>${version.maven-plugin-tools}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <releaseProfiles>release</releaseProfiles>
-                        <tagNameFormat>v@{project.version}</tagNameFormat>
-                        <useReleaseProfile>false</useReleaseProfile>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -539,24 +520,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.4</version>
-                    <configuration>
-                        <buildNumberPropertyName>build.revision</buildNumberPropertyName>
-                        <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>determine-build-number</id>
-                            <goals>
-                                <goal>create</goal>
-                            </goals>
-                            <phase>validate</phase>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>2.0.0</version>
                 </plugin>
@@ -566,29 +529,10 @@
                     <version>1.1.0</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.8.1</version>
-                </plugin>
-                <plugin>
                     <groupId>org.gaul</groupId>
                     <artifactId>modernizer-maven-plugin</artifactId>
-                    <version>2.3.0</version>
+                    <version>2.4.0</version>
                     <configuration>
-                        <exclusionPatterns>
-                            <!-- The plugin suggests replacing Guava's
-                            immutable collection factory methods with
-                            `java.util.{List,Map,Set}.{copyOf,of}`, but those
-                            methods don't allow one to convey immutability at
-                            the type system level. -->
-                            <exclusionPattern>com/google/common/collect/Immutable(List|Map|Set)\.(copyOf|of):.*</exclusionPattern>
-                            <!-- The plugin suggests replacing usages of
-                            Guava's `Iterables` class with
-                            `java.util.stream.Stream` equivalents, but the
-                            alternative is often more verbose, requiring
-                            unnecessary conversions to and from streams. -->
-                            <exclusionPattern>com/google/common/collect/Iterables\..*</exclusionPattern>
-                        </exclusionPatterns>
                         <failOnViolations>false</failOnViolations>
                         <javaVersion>${version.jdk}</javaVersion>
                     </configuration>
@@ -669,7 +613,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
-            <plugin><!-- XXX: We require this plugin execution only because there
+            <plugin>
+                <!-- XXX: We require this plugin execution only because there
                 is no way to tell the `jooq-codegen-maven` that it generates
                 _test_ code. File an issue with jOOQ to discuss improving this.
                 (See also the `maven-javadoc-plugin` and `maven-source-plugin`
@@ -692,10 +637,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
                 <configuration>
@@ -713,8 +654,7 @@
                                     <userType>Long[]</userType>
                                     <includeExpression>.*\.RELATEDFOOIDS</includeExpression>
                                     <converter>org.jooq.Converter.ofNullable(Object[].class, Long[].class, i -&gt;
-                                        (Long[])i, i -&gt; i)
-                                    </converter>
+                                        (Long[])i, i -&gt; i)</converter>
                                 </forcedType>
                             </forcedTypes>
                         </database>
@@ -735,6 +675,17 @@
                         <phase>generate-test-sources</phase>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
             </plugin>
         </plugins>
     </build>
