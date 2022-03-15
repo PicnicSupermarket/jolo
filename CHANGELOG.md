@@ -37,7 +37,7 @@ multiple public methods.
 
 ### Upgrade Notes
 
-Comping from [Jolo v0.0.2](https://github.com/PicnicSupermarket/jolo/releases/tag/v0.0.2) perform these case-sensitive
+Coming from [Jolo v0.0.2](https://github.com/PicnicSupermarket/jolo/releases/tag/v0.0.2) perform these case-sensitive
 string search & replace operations in places where you've previously used Jolo:
 
 - `LoaderFactory.create` -> `Loader.of`

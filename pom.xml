@@ -485,7 +485,7 @@
                         `maven-source-plugin` does not support _exclusion_ of
                         selected files. -->
                         <includes>
-                            <include>**/jolo/*.java</include>
+                            <include>**/folo/*.java</include>
                         </includes>
                     </configuration>
                     <executions>
