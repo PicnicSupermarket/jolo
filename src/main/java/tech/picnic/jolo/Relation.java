@@ -1,28 +1,22 @@
 package tech.picnic.jolo;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static tech.picnic.jolo.Util.validate;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import org.jooq.Field;
 import org.jooq.Record;
 
 /**
- * Represents a relation between two {@link Entity entities}. This class is used to store a relation
- * (pairs of primary keys) loaded from a data set.
+ * Represents a relation between two {@link Entity entities}. This class is used to extract links
+ * between a data set's rows and set their corresponding objects' references.
  *
- * @param <L> The Java class that the left-hand side of the relation is mapped to
+ * @param <L> The Java class that the left-hand side of the relation is mapped to.
  * @param <R> The Java class that the right-hand side of the relation is mapped to.
  */
 final class Relation<L, R> {
@@ -32,7 +26,6 @@ final class Relation<L, R> {
     MANY
   }
 
-  private final Set<IdPair> pairs = new LinkedHashSet<>();
   private final Entity<L, ?> left;
   private final Entity<R, ?> right;
   private final Field<Long> leftKey;
@@ -41,8 +34,7 @@ final class Relation<L, R> {
   private final Arity rightArity;
   private final Optional<BiConsumer<L, ?>> leftSetter;
   private final Optional<BiConsumer<R, ?>> rightSetter;
-  private final BiConsumer<Record, Set<IdPair>> relationLoader;
-  private final boolean relationLoaderIsCustom;
+  private final Function<Record, Set<IdPair>> relationLoader;
 
   @SuppressWarnings("ConstructorLeaksThis")
   Relation(
@@ -54,7 +46,7 @@ final class Relation<L, R> {
       Arity rightArity,
       Optional<BiConsumer<L, ?>> leftSetter,
       Optional<BiConsumer<R, ?>> rightSetter,
-      Optional<BiConsumer<Record, Set<IdPair>>> relationLoader) {
+      Optional<Function<Record, Set<IdPair>>> relationLoader) {
     this.left = left;
     this.right = right;
     this.leftKey = leftKey;
@@ -64,115 +56,100 @@ final class Relation<L, R> {
     this.leftSetter = leftSetter;
     this.rightSetter = rightSetter;
     this.relationLoader = relationLoader.orElse(this::foreignKeyRelationLoader);
-    this.relationLoaderIsCustom = relationLoader.isPresent();
   }
 
-  /** Copies this relation, discarding any state. This method is used in a prototype pattern. */
-  @SuppressWarnings("unchecked")
-  Relation<L, R> copy(Map<Entity<?, ?>, Entity<?, ?>> newEntities) {
-    Entity<L, ?> newLeft = (Entity<L, ?>) newEntities.get(left);
-    assert newLeft != null : "Attempt to create copy without new left entity";
-    Entity<R, ?> newRight = (Entity<R, ?>) newEntities.get(right);
-    assert newRight != null : "Attempt to create copy without new right entity";
-    return new Relation<>(
-        newLeft,
-        newRight,
-        leftKey,
-        rightKey,
+  @Override
+  public String toString() {
+    return String.format(
+        "%s-to-%s Relation<%s (%s), %s (%s)>",
         leftArity,
         rightArity,
-        leftSetter,
-        rightSetter,
-        relationLoaderIsCustom ? Optional.of(relationLoader) : Optional.empty());
+        left.getTable().getName(),
+        leftKey.getName(),
+        right.getTable().getName(),
+        rightKey.getName());
   }
 
-  /** Attempts to load a relation from the given record. */
-  void load(Record record) {
-    relationLoader.accept(record, pairs);
+  @SuppressWarnings("NoFunctionalReturnType")
+  Function<Record, Set<IdPair>> getRelationLoader() {
+    return relationLoader;
   }
 
-  /**
-   * Given the relation pairs stored in this object, setters are called on the objects loaded by the
-   * left and right {@link Entity}.
-   */
-  void link() {
-    leftSetter.ifPresent(this::linkLeft);
-    rightSetter.ifPresent(this::linkRight);
+  Entity<L, ?> getLeft() {
+    return left;
+  }
+
+  Entity<R, ?> getRight() {
+    return right;
+  }
+
+  /** Given an {@link ObjectMapping object mapping}, setters are called on the objects. */
+  void link(ObjectMapping<L, R> objectMappping) {
+    leftSetter.ifPresent(setter -> link(setter, objectMappping.toSuccessors(), rightArity));
+    rightSetter.ifPresent(setter -> link(setter, objectMappping.toPredecessors(), leftArity));
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private void linkLeft(BiConsumer setter) {
-    switch (rightArity) {
+  private <T, U> void link(BiConsumer setter, Map<T, List<U>> objectMapping, Arity arity) {
+    switch (arity) {
       case MANY:
-        linkMany(left.getEntityMap(), setter, getPostSets());
+        linkMany(objectMapping, setter);
         break;
       case ONE:
-        linkOne(left.getEntityMap(), setter, getSuccessors());
+        linkOne(objectMapping, setter);
         break;
       case ZERO_OR_ONE:
-        linkOptional(left.getEntityMap(), setter, getSuccessors());
+        linkOptional(objectMapping, setter);
         break;
     }
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private void linkRight(BiConsumer setter) {
-    switch (leftArity) {
-      case MANY:
-        linkMany(right.getEntityMap(), setter, getPreSets());
-        break;
-      case ONE:
-        linkOne(right.getEntityMap(), setter, getPredecessors());
-        break;
-      case ZERO_OR_ONE:
-        linkOptional(right.getEntityMap(), setter, getPredecessors());
-        break;
-    }
+  private <T, U> void linkOne(Map<T, List<U>> objectMapping, BiConsumer<T, U> setter) {
+    objectMapping.forEach(
+        (object, successors) -> {
+          validate(
+              successors.size() <= 1,
+              "N-to-1 relation between %s (%s) and %s (%s) contains conflicting tuples. "
+                  + "Encountered more than one entity candidate for a given entity on the left side. "
+                  + "Please verify that the query result's rows abide by the loader definition.",
+              left,
+              leftArity,
+              right,
+              rightArity);
+          validate(
+              !successors.isEmpty(),
+              "N-to-1 relation between %s (%s) and %s (%s) contains conflicting tuples. "
+                  + "Encountered no entity candidate for a given entity on the left side. "
+                  + "Please verify that the query result's rows abide by the loader definition.",
+              left,
+              leftArity,
+              right,
+              rightArity);
+          setter.accept(object, successors.get(0));
+        });
   }
 
-  private static <T, U> void linkOne(
-      Map<Long, T> entities, BiConsumer<T, U> setter, Map<Long, U> successors) {
-    entities.forEach((id, e) -> setter.accept(e, successors.get(id)));
-  }
-
-  private static <T, U> void linkOptional(
-      Map<Long, T> entities, BiConsumer<T, Optional<U>> setter, Map<Long, U> successors) {
-    entities.forEach((id, e) -> setter.accept(e, Optional.ofNullable(successors.get(id))));
+  private <T, U> void linkOptional(
+      Map<T, List<U>> objectMapping, BiConsumer<T, Optional<U>> setter) {
+    objectMapping.forEach(
+        (object, successors) -> {
+          validate(
+              successors.size() <= 1,
+              "N-to-0..1 relation between %s (%s) and %s (%s) contains conflicting tuples. "
+                  + "Encountered more than one entity candidate for a given entity on the left side. "
+                  + "Please verify that the query result's rows abide by the loader definition.",
+              left,
+              leftArity,
+              right,
+              rightArity);
+          setter.accept(
+              object, successors.isEmpty() ? Optional.empty() : Optional.of(successors.get(0)));
+        });
   }
 
   private static <T, U> void linkMany(
-      Map<Long, T> entities, BiConsumer<T, Collection<U>> setter, Map<Long, List<U>> successors) {
-    entities.forEach((id, e) -> setter.accept(e, successors.getOrDefault(id, emptyList())));
-  }
-
-  private Map<Long, List<L>> getPreSets() {
-    return pairs.stream().collect(toMultiset(IdPair::getRightId, p -> left.get(p.getLeftId())));
-  }
-
-  private Map<Long, List<R>> getPostSets() {
-    return pairs.stream().collect(toMultiset(IdPair::getLeftId, p -> right.get(p.getRightId())));
-  }
-
-  private static <T, K, V> Collector<T, ?, Map<K, List<V>>> toMultiset(
-      Function<T, K> keyFunction, Function<T, V> valueFunction) {
-    return groupingBy(keyFunction, mapping(valueFunction, toList()));
-  }
-
-  private Map<Long, L> getPredecessors() {
-    return pairs.stream()
-        .collect(toMap(IdPair::getRightId, p -> left.get(p.getLeftId()), this::unexpectedPair));
-  }
-
-  private Map<Long, R> getSuccessors() {
-    return pairs.stream()
-        .collect(toMap(IdPair::getLeftId, p -> right.get(p.getRightId()), this::unexpectedPair));
-  }
-
-  private <T> T unexpectedPair(T oldValue, T newValue) {
-    throw new ValidationException(
-        String.format(
-            "N-to-1 relation between %s (%s) and %s (%s) contains (x, %s) and (x, %s)",
-            left, right, leftArity, rightArity, oldValue, newValue));
+      Map<T, List<U>> objectMapping, BiConsumer<T, Collection<U>> setter) {
+    objectMapping.forEach(setter);
   }
 
   /**
@@ -181,11 +158,9 @@ final class Relation<L, R> {
    * key, or two foreign keys in case of a many-to-may relation), and if both can be found, the two
    * values are considered to represent a pair that is part of the relation.
    */
-  private void foreignKeyRelationLoader(Record record, Set<IdPair> sink) {
+  private Set<IdPair> foreignKeyRelationLoader(Record record) {
     Long leftId = record.get(leftKey);
     Long rightId = record.get(rightKey);
-    if (leftId != null && rightId != null) {
-      sink.add(IdPair.of(leftId, rightId));
-    }
+    return (leftId != null && rightId != null) ? Set.of(IdPair.of(leftId, rightId)) : Set.of();
   }
 }

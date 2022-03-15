@@ -3,19 +3,17 @@ package tech.picnic.jolo;
 import org.jooq.Record;
 import org.jooq.Table;
 
-/**
- * Creates a {@link Loader}. Cannot be instantiated directly; use {@link LoaderFactory#create}
- * instead.
- */
-public interface LoaderFactoryBuilder<T> {
+/** Interface implemented by classes that can create {@link Loader} objects. */
+public interface LoaderBuilder<T> {
 
-  LoaderFactory<T> build();
+  /** Creates a new {@link Loader}. */
+  Loader<T> build();
 
   /**
    * Specifies that there is a relation between two entities. The entities that are passed in are
-   * automatically deserialised by the loaders created by {@link LoaderFactory#newLoader}. This
-   * method returns a builder that allows you to specify further details about the relation, and
-   * about how it is loaded.
+   * automatically deserialised by the loaders created by {@link LoaderBuilder#build()}. This method
+   * returns a builder that allows you to specify further details about the relation, and about how
+   * it is loaded.
    */
   <L, R> RelationBuilder<T, L, R> relation(Entity<L, ?> left, Entity<R, ?> right);
 

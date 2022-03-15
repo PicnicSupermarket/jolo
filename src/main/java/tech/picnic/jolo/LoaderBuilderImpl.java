@@ -1,9 +1,5 @@
 package tech.picnic.jolo;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static tech.picnic.jolo.Util.getForeignKey;
 import static tech.picnic.jolo.Util.getOptionalForeignKey;
 import static tech.picnic.jolo.Util.validate;
@@ -11,55 +7,37 @@ import static tech.picnic.jolo.Util.validate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.TableField;
 
-/**
- * Creates a {@link Loader}. Cannot be instantiated directly; use {@link LoaderFactory#create}
- * instead.
- */
-final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, LoaderFactory<T> {
+/** Creates a {@link Loader}. Cannot be instantiated directly; use {@link Loader#of} instead. */
+final class LoaderBuilderImpl<T> implements LoaderBuilder<T> {
   private final Entity<T, ?> entity;
   private final Set<Entity<?, ?>> entities = new HashSet<>();
   private final List<Relation<?, ?>> relations = new ArrayList<>();
 
-  LoaderFactoryBuilderImpl(Entity<T, ?> entity) {
+  LoaderBuilderImpl(Entity<T, ?> entity) {
     this.entity = entity;
     entities.add(entity);
   }
 
-  @Override
-  public LoaderFactory<T> build() {
-    return this;
-  }
-
   /**
    * Creates a new {@link Loader} with the entities and relations specified in this builder. The
-   * resulting loader can be used as a jOOQ record handler.
+   * resulting loader can be used as a {@link Record record} {@link java.util.stream.Collector
+   * collector}.
    *
    * @see Loader
    */
   @Override
-  public Loader<T> newLoader() {
-    // We use a prototype pattern to create new entities / relations that keep state about the
-    // deserialisation process, by calling Entity#copy and Relation#copy.
-    Map<Entity<?, ?>, Entity<?, ?>> newEntities =
-        entities.stream().collect(toMap(identity(), Entity::copy));
-    @SuppressWarnings("unchecked")
-    Entity<T, ?> mainEntity = (Entity<T, ?>) newEntities.get(entity);
-    assert mainEntity != null : "Main entity was not copied";
-    return new Loader<>(
-        mainEntity,
-        entities.stream().map(newEntities::get).collect(toSet()),
-        relations.stream().map(r -> r.copy(newEntities)).collect(toList()));
+  public Loader<T> build() {
+    return new Loader<>(entity, entities, relations);
   }
 
   /**
    * Specifies that there is a relation between two entities. The entities that are passed in are
-   * automatically deserialised by the loaders created by {@link #newLoader}. This method returns a
+   * automatically deserialised by the loaders created by {@link #build()}. This method returns a
    * builder that allows you to specify further details about the relation, and about how it is
    * loaded.
    */
@@ -129,10 +107,9 @@ final class LoaderFactoryBuilderImpl<T> implements LoaderFactoryBuilder<T>, Load
   }
 
   /**
-   * Used by {@link RelationBuilder} to return completed {@link Relation} prototypes to this
-   * builder.
+   * Used by {@link RelationBuilder} to return completed {@link Relation relations} to this builder.
    */
-  LoaderFactoryBuilderImpl<T> addRelation(Relation<?, ?> relation) {
+  LoaderBuilderImpl<T> addRelation(Relation<?, ?> relation) {
     relations.add(relation);
     return this;
   }

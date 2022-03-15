@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -15,10 +16,10 @@ import tech.picnic.jolo.Relation.Arity;
 
 /**
  * Class used to specify a {@link Relation}. Cannot be instantiated directly, but is created as part
- * of the fluent API {@link LoaderFactory#create(Entity)}.
+ * of the fluent API {@link Loader#of(Entity)}.
  */
 public final class RelationBuilder<T, L, R> {
-  private final LoaderFactoryBuilderImpl<T> builder;
+  private final LoaderBuilderImpl<T> builder;
   private final Entity<L, ?> left;
   private final Entity<R, ?> right;
   @Nullable private Field<Long> leftKey;
@@ -27,16 +28,16 @@ public final class RelationBuilder<T, L, R> {
   @Nullable private Arity rightArity;
   @Nullable private BiConsumer<L, ?> leftSetter;
   @Nullable private BiConsumer<R, ?> rightSetter;
-  private Optional<BiConsumer<Record, Set<IdPair>>> relationLoader = Optional.empty();
+  private Optional<Function<Record, Set<IdPair>>> relationLoader = Optional.empty();
 
-  RelationBuilder(LoaderFactoryBuilderImpl<T> builder, Entity<L, ?> left, Entity<R, ?> right) {
+  RelationBuilder(LoaderBuilderImpl<T> builder, Entity<L, ?> left, Entity<R, ?> right) {
     this.builder = builder;
     this.left = left;
     this.right = right;
   }
 
   /** Shorthand for {@code .and().build()}, to make the API read more naturally. */
-  public LoaderFactory<T> build() {
+  public Loader<T> build() {
     return and().build();
   }
 
@@ -44,10 +45,18 @@ public final class RelationBuilder<T, L, R> {
    * Finalises the current relation definition and returns to the loader builder that the new
    * relation was created for.
    */
-  public LoaderFactoryBuilder<T> and() {
+  public LoaderBuilder<T> and() {
     validate(
         leftSetter != null || rightSetter != null,
         "Relationship between %s and %s has no setters",
+        left,
+        right);
+    // Prevent against obviously dangerous setter equivalence.
+    // Note that function equivalence is generally undecidable, so this check is not exhaustive and
+    // should not be relied upon.
+    validate(
+        leftSetter != rightSetter,
+        "Left and right setter of relationship between %s and %s are the same",
         left,
         right);
     assert leftKey != null : "Left key was not set";
@@ -155,8 +164,7 @@ public final class RelationBuilder<T, L, R> {
   }
 
   /** Specifies a function to programmatically identify relation pairs in loaded records. */
-  public RelationBuilder<T, L, R> setRelationLoader(
-      BiConsumer<Record, Set<IdPair>> relationLoader) {
+  public RelationBuilder<T, L, R> setRelationLoader(Function<Record, Set<IdPair>> relationLoader) {
     this.relationLoader = Optional.of(relationLoader);
     return this;
   }

@@ -4,7 +4,6 @@ import com.google.errorprone.annotations.FormatMethod;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -42,16 +41,6 @@ final class Util {
         fromTable.getName(),
         intoTable.getName());
     return Optional.of(getKey(from, keys.get(0).getFields(), "foreign"));
-  }
-
-  static boolean equalFieldNames(@Nullable Field<?> left, @Nullable Field<?> right) {
-    if (left == null) {
-      return right == null;
-    }
-    if (right == null) {
-      return false;
-    }
-    return left.getQualifiedName().equals(right.getQualifiedName());
   }
 
   @FormatMethod

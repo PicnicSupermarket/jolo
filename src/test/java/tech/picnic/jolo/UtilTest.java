@@ -32,11 +32,4 @@ public final class UtilTest {
     assertFalse(FOO.ID.equals(Tables.FOO.ID));
     assertTrue(FOO.ID.getQualifiedName().equals(Tables.FOO.ID.getQualifiedName()));
   }
-
-  @Test
-  public void testEqualFieldName() {
-    Field<Long> identical = DSL.field(DSL.name("FOO", "ID"), Long.class);
-    assertTrue(Util.equalFieldNames(FOO.ID, identical));
-    assertTrue(Util.equalFieldNames(identical, FOO.ID));
-  }
 }

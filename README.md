@@ -8,8 +8,7 @@
 [![SonarCloud Maintainability][sonarcloud-badge-maintainability]][sonarcloud-measure-maintainability]
 [![BCH compliance][bettercodehub-badge]][bettercodehub-results]
 
-Short for _jOOQ Loader_. A utility library to add basic object-relation mapping
-to your [jOOQ][jooq] code.
+Short for _jOOQ Loader_. A utility library to add basic object-relation mapping to your [jOOQ][jooq] code.
 
 ![Picnic-jolo][jolo-image]
 
@@ -21,42 +20,40 @@ Artifacts are hosted on [Maven's Central Repository][maven-central-browse]:
 
 ```groovy
 dependencies {
-    compile 'tech.picnic.jolo:jolo:0.0.1'
+  compile 'tech.picnic.jolo:jolo:0.0.3'
 }
 ```
 
 ### Maven
 
 ```xml
+
 <dependency>
-    <groupId>tech.picnic.jolo</groupId>
-    <artifactId>jolo</artifactId>
-    <version>0.0.1</version>
+  <groupId>tech.picnic.jolo</groupId>
+  <artifactId>jolo</artifactId>
+  <version>0.0.3</version>
 </dependency>
 ```
 
 ## Features
 
 - Easy specification of relations between entities using a chaining API.
-- Object instantiation using jOOQ's native "into" method; the loader can
-  additionally call setters to instantiate relationships between entities.
-- Performs foreign key checks to see whether the defined relationships make
-  sense.
-- Extra checks on field names of returned records to prevent loading fields
-  from one table as fields of another (no implicit conversion of `FOO.FIELD` to
-  `BAR.FIELD`).
+- Implements `java.util.stream.Collector` allowing object instantiation using jOOQ's native "collect" method; the loader
+  can additionally call setters to instantiate relationships between entities.
+- Performs foreign key checks to see whether the defined relationships make sense.
+- Extra checks on field names of returned records to prevent loading fields from one table as fields of another (no
+  implicit conversion of `FOO.FIELD` to `BAR.FIELD`).
 - Supports circular references.
 - Supports adding extra (non-table) fields to entities.
 
-## Limitations
+## Limitations/Potential improvements
 
-- Only primary / foreign keys of (Java) type `long` are supported. We have no
-  intention to support composite foreign keys for the time being. For keys of
-  different types (e.g.  `String`) we would accept pull requests, but only if
-  this does not further complicate the interface of the library (no long type
-  parameter lists).
-- Relation mapping does not work yet for entities that are not based on a table
-  in the DB schema.
+- Only primary / foreign keys of (Java) type `long` are supported. We have no intention to support composite foreign
+  keys for the time being. For keys of different types (e.g.  `String`) we would accept pull requests, but only if this
+  does not further complicate the interface of the library (no long type parameter lists).
+- Relation mapping does not work yet for entities that are not based on a table in the DB schema.
+- Implement stricter builder pattern for loader definition.
+- Investigate nullness, @CheckReturnValue and @Contract annotations
 
 ## Example usage
 
@@ -76,8 +73,7 @@ CREATE TABLE Flea (
 )
 ```
 
-And in Java you have modelled your dogs and fleas using POJOs that are serialisable using
-standard jOOQ functionality:
+And in Java you have modelled your dogs and fleas using POJOs that are serialisable using standard jOOQ functionality:
 
 ```java
 class Dog {
@@ -110,22 +106,20 @@ Using this library, you can specify how to instantiate the relationship between 
 (i.e., how to fill the `fleas` property of `Dog`):
 
 ```java
-LoaderFactory<Dog> createLoaderFactory() {
-  var dog = new Entity<>(Tables.DOG, Dog.class);
-  var flea = new Entity<>(Tables.FLEA, Flea.class);
-  return LoaderFactory.create(dog)
-      .oneToMany(dog, flea)
-      .setManyLeft(Dog::setFleas)
-      .build();
+class LoaderUtil {
+  static Loader<Dog> createLoader() {
+    var dog = new Entity<>(Tables.DOG, Dog.class);
+    var flea = new Entity<>(Tables.FLEA, Flea.class);
+    return Loader.of(dog).oneToMany(dog, flea).setManyLeft(Dog::setFleas).build();
+  }
 }
 ```
 
-Then in the code that executes the query, you can use the loader to instantiate
-and link POJO classes:
+Then in the code that executes the query, you can use the loader to instantiate and link POJO classes:
 
 ```java
 class Repository {
-  private static final LoaderFactory<Dog> LOADER_FACTORY = createLoaderFactory();
+  private static final Loader<Dog> LOADER = createLoader();
 
   private final DSLContext context;
 
@@ -134,8 +128,7 @@ class Repository {
       .from(DOG)
       .leftJoin(FLEA)
       .on(FLEA.DOG_ID.eq(DOG.ID))
-      .fetchInto(LOADER_FACTORY.newLoader())
-      .get();
+      .collect(toLinkedObjectsWith(LOADER));
 
     for (Dog dog : dogs) {
       int fleaWeight = dog.getFleas().stream().mapToInt(Flea::getWeight).sum();
@@ -152,11 +145,9 @@ class Repository {
 Contributions are welcome! Feel free to file an [issue][new-issue] or open a
 [pull request][new-pr].
 
-When submitting changes, please make every effort to follow existing
-conventions and style in order to keep the code as readable as possible. New
-code must be covered by tests. As a rule of thumb, overall test coverage should
-not decrease. (There are exceptions to this rule, e.g. when more code is
-deleted than added.)
+When submitting changes, please make every effort to follow existing conventions and style in order to keep the code as
+readable as possible. New code must be covered by tests. As a rule of thumb, overall test coverage should not
+decrease. (There are exceptions to this rule, e.g. when more code is deleted than added.)
 
 [bettercodehub-badge]: https://bettercodehub.com/edge/badge/PicnicSupermarket/jolo?branch=master
 [bettercodehub-results]: https://bettercodehub.com/results/PicnicSupermarket/jolo
