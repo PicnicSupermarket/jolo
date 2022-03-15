@@ -1,10 +1,10 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
-import static tech.picnic.jolo.Loader.toLinkedObjectsWith;
-import static tech.picnic.jolo.TestUtil.createRecord;
-import static tech.picnic.jolo.data.schema.base.Tables.BAR;
-import static tech.picnic.jolo.data.schema.base.Tables.FOO;
-import static tech.picnic.jolo.data.schema.base.Tables.FOOBAR;
+import static io.github.ferdinandswoboda.folo.Loader.toLinkedObjectsWith;
+import static io.github.ferdinandswoboda.folo.TestUtil.createRecord;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.BAR;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.FOO;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.FOOBAR;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;

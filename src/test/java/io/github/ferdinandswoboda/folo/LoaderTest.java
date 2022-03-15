@@ -1,18 +1,19 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
+import static io.github.ferdinandswoboda.folo.TestUtil.createRecord;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.BAR;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.BAZ;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.FOO;
+import static io.github.ferdinandswoboda.folo.data.schema.base.Tables.FOOBAR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static tech.picnic.jolo.Loader.toLinkedObjectsWith;
-import static tech.picnic.jolo.TestUtil.createRecord;
-import static tech.picnic.jolo.data.schema.base.Tables.BAR;
-import static tech.picnic.jolo.data.schema.base.Tables.BAZ;
-import static tech.picnic.jolo.data.schema.base.Tables.FOO;
-import static tech.picnic.jolo.data.schema.base.Tables.FOOBAR;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import io.github.ferdinandswoboda.folo.data.schema.base.tables.Bar;
+import io.github.ferdinandswoboda.folo.data.schema.base.tables.Foo;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,11 +27,6 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
-import tech.picnic.jolo.TestUtil.BarEntity;
-import tech.picnic.jolo.TestUtil.BazEntity;
-import tech.picnic.jolo.TestUtil.FooEntity;
-import tech.picnic.jolo.data.schema.base.tables.Bar;
-import tech.picnic.jolo.data.schema.base.tables.Foo;
 
 public final class LoaderTest {
   @Test
@@ -44,13 +40,13 @@ public final class LoaderTest {
   }
 
   private static void runOneToManyTest(Foo fooTable, Bar barTable) {
-    Entity<FooEntity, ?> foo = new Entity<>(fooTable, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(barTable, BarEntity.class);
-    Loader<FooEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(fooTable, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(barTable, TestUtil.BarEntity.class);
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .oneToMany(foo, bar)
-            .setManyLeft(FooEntity::setBarList)
-            .setOneRight(BarEntity::setFoo)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setOneRight(TestUtil.BarEntity::setFoo)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -75,29 +71,30 @@ public final class LoaderTest {
                 barTable.FOOID, 1L,
                 barTable.BAR_, 3)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    BarEntity expectedBar1 = new BarEntity(1L, 1L, 2, null, null);
-    BarEntity expectedBar2 = new BarEntity(2L, 1L, 3, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.BarEntity expectedBar1 = new TestUtil.BarEntity(1L, 1L, 2, null, null);
+    TestUtil.BarEntity expectedBar2 = new TestUtil.BarEntity(2L, 1L, 3, null, null);
     expectedBar1.setFoo(expectedFoo);
     expectedBar2.setFoo(expectedFoo);
     expectedFoo.setBarList(ImmutableList.of(expectedBar1, expectedBar2));
 
-    List<FooEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.FooEntity> entities = l.finisher().apply(objectGraph);
     assertIterableEquals(ImmutableList.of(expectedFoo), entities);
   }
 
   @Test
   public void testOneToManyWrongWayAround() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
     assertThrows(IllegalArgumentException.class, () -> Loader.of(foo).oneToMany(bar, foo));
   }
 
   @Test
   public void testEncounterOrder() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l = Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
+        Loader.of(bar).oneToOne(bar, foo).setOneLeft(TestUtil.BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -115,25 +112,26 @@ public final class LoaderTest {
         createRecord(
             ImmutableMap.of(FOO.ID, 2L, FOO.FOO_, 1, BAR.ID, 2L, BAR.FOOID, 2L, BAR.BAR_, 2)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    FooEntity expectedFoo2 = new FooEntity(2L, 1, null);
-    FooEntity expectedFoo3 = new FooEntity(3L, 1, null);
-    BarEntity expectedBar = new BarEntity(1L, 1L, 2, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.FooEntity expectedFoo2 = new TestUtil.FooEntity(2L, 1, null);
+    TestUtil.FooEntity expectedFoo3 = new TestUtil.FooEntity(3L, 1, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, 1L, 2, null, null);
     expectedBar.setFoo(expectedFoo);
-    BarEntity expectedBar2 = new BarEntity(2L, 2L, 2, null, null);
+    TestUtil.BarEntity expectedBar2 = new TestUtil.BarEntity(2L, 2L, 2, null, null);
     expectedBar2.setFoo(expectedFoo2);
-    BarEntity expectedBar3 = new BarEntity(3L, 3L, 2, null, null);
+    TestUtil.BarEntity expectedBar3 = new TestUtil.BarEntity(3L, 3L, 2, null, null);
     expectedBar3.setFoo(expectedFoo3);
 
-    List<BarEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.BarEntity> entities = l.finisher().apply(objectGraph);
     assertIterableEquals(ImmutableList.of(expectedBar, expectedBar3, expectedBar2), entities);
   }
 
   @Test
   public void testOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l = Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
+        Loader.of(bar).oneToOne(bar, foo).setOneLeft(TestUtil.BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -148,30 +146,30 @@ public final class LoaderTest {
         createRecord(
             ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 1, BAR.ID, 1L, BAR.FOOID, 1L, BAR.BAR_, 2)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    BarEntity expectedBar = new BarEntity(1L, 1L, 2, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, 1L, 2, null, null);
     expectedBar.setFoo(expectedFoo);
 
-    List<BarEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.BarEntity> entities = l.finisher().apply(objectGraph);
     assertIterableEquals(ImmutableList.of(expectedBar), entities);
   }
 
   @Test
   public void testOneToOneAmbiguous() {
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Entity<BazEntity, ?> baz = new Entity<>(BAZ, BazEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Entity<TestUtil.BazEntity, ?> baz = new Entity<>(BAZ, TestUtil.BazEntity.class);
     assertThrows(ValidationException.class, () -> Loader.of(bar).oneToOne(bar, baz));
   }
 
   @Test
   public void testOneToZeroOrOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<FooEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .oneToZeroOrOne(foo, bar)
-            .setZeroOrOneLeft(FooEntity::setBarOptional)
-            .setOneRight(BarEntity::setFoo)
+            .setZeroOrOneLeft(TestUtil.FooEntity::setBarOptional)
+            .setOneRight(TestUtil.BarEntity::setFoo)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -183,9 +181,9 @@ public final class LoaderTest {
             ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 1, BAR.ID, 1L, BAR.FOOID, 1L, BAR.BAR_, 2)));
     accumulator.accept(objectGraph, createRecord(ImmutableMap.of(FOO.ID, 2L, FOO.FOO_, 2), BAR));
 
-    FooEntity expectedFoo1 = new FooEntity(1L, 1, null);
-    FooEntity expectedFoo2 = new FooEntity(2L, 2, null);
-    BarEntity expectedBar = new BarEntity(1L, 1L, 2, null, null);
+    TestUtil.FooEntity expectedFoo1 = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.FooEntity expectedFoo2 = new TestUtil.FooEntity(2L, 2, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, 1L, 2, null, null);
     expectedBar.setFoo(expectedFoo1);
     expectedFoo1.setBarOptional(Optional.of(expectedBar));
     expectedFoo2.setBarOptional(Optional.empty());
@@ -196,12 +194,12 @@ public final class LoaderTest {
 
   @Test
   public void testOptionalOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .optionalOneToOne(bar, foo)
-            .setZeroOrOneLeft(BarEntity::setFooOptional)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setFooOptional)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -217,8 +215,8 @@ public final class LoaderTest {
         createRecord(
             ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 1, BAR.ID, 1L, BAR.FOOID, 1L, BAR.BAR_, 2)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    BarEntity expectedBar = new BarEntity(1L, 1L, 2, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, 1L, 2, null, null);
     expectedBar.setFooOptional(Optional.of(expectedFoo));
 
     assertIterableEquals(ImmutableList.of(expectedBar), l.finisher().apply(objectGraph));
@@ -226,12 +224,12 @@ public final class LoaderTest {
 
   @Test
   public void testEmptyOptionalOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .optionalOneToOne(bar, foo)
-            .setZeroOrOneLeft(BarEntity::setFooOptional)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setFooOptional)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -243,7 +241,7 @@ public final class LoaderTest {
     accumulator.accept(
         objectGraph, createRecord(ImmutableMap.of(BAR.ID, 1L, BAR.BAR_, 2), FOO, BAR));
 
-    BarEntity expectedBar = new BarEntity(1L, null, 2, null, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, null, 2, null, null);
     expectedBar.setFooOptional(Optional.empty());
 
     assertIterableEquals(ImmutableList.of(expectedBar), l.finisher().apply(objectGraph));
@@ -251,12 +249,12 @@ public final class LoaderTest {
 
   @Test
   public void testZeroOrOneToOne() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .optionalOneToOne(bar, foo)
-            .setZeroOrOneLeft(BarEntity::setFooOptional)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setFooOptional)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -264,7 +262,7 @@ public final class LoaderTest {
 
     accumulator.accept(objectGraph, createRecord(ImmutableMap.of(BAR.ID, 1L, BAR.BAR_, 2), FOO));
 
-    BarEntity expectedBar = new BarEntity(1L, null, 2, null, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, null, 2, null, null);
     expectedBar.setFooOptional(Optional.empty());
 
     assertIterableEquals(ImmutableList.of(expectedBar), l.finisher().apply(objectGraph));
@@ -272,13 +270,13 @@ public final class LoaderTest {
 
   @Test
   public void testZeroOrOneToMany() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .zeroOrOneToMany(foo, bar)
-            .setManyLeft(FooEntity::setBarList)
-            .setZeroOrOneRight(BarEntity::setFooOptional)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setZeroOrOneRight(TestUtil.BarEntity::setFooOptional)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -292,9 +290,9 @@ public final class LoaderTest {
         objectGraph,
         createRecord(ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 1, BAR.ID, 2L, BAR.BAR_, 3)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    BarEntity expectedBar1 = new BarEntity(1L, 1L, 2, null, null);
-    BarEntity expectedBar2 = new BarEntity(2L, null, 3, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.BarEntity expectedBar1 = new TestUtil.BarEntity(1L, 1L, 2, null, null);
+    TestUtil.BarEntity expectedBar2 = new TestUtil.BarEntity(2L, null, 3, null, null);
     expectedBar1.setFooOptional(Optional.of(expectedFoo));
     expectedBar2.setFooOptional(Optional.empty());
     expectedFoo.setBarList(ImmutableList.of(expectedBar1));
@@ -305,9 +303,12 @@ public final class LoaderTest {
 
   @Test
   public void testZeroOrOneToManyRecursiveReference() {
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
-        Loader.of(bar).zeroOrOneToMany(bar, bar).setZeroOrOneRight(BarEntity::setOtherBar).build();
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
+        Loader.of(bar)
+            .zeroOrOneToMany(bar, bar)
+            .setZeroOrOneRight(TestUtil.BarEntity::setOtherBar)
+            .build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -317,8 +318,8 @@ public final class LoaderTest {
     accumulator.accept(
         objectGraph, createRecord(ImmutableMap.of(BAR.ID, 2L, BAR.BAR_, 2, BAR.OTHERBARID, 2L)));
 
-    BarEntity expectedBar1 = new BarEntity(1L, null, 1, 2L, null);
-    BarEntity expectedBar2 = new BarEntity(2L, null, 2, 2L, null);
+    TestUtil.BarEntity expectedBar1 = new TestUtil.BarEntity(1L, null, 1, 2L, null);
+    TestUtil.BarEntity expectedBar2 = new TestUtil.BarEntity(2L, null, 2, 2L, null);
     expectedBar1.setOtherBar(Optional.of(expectedBar2));
     expectedBar2.setOtherBar(Optional.of(expectedBar2));
 
@@ -328,9 +329,10 @@ public final class LoaderTest {
 
   @Test
   public void testNToOneThrowsIfManyAreFound() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l = Loader.of(bar).oneToOne(bar, foo).setOneLeft(BarEntity::setFoo).build();
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
+        Loader.of(bar).oneToOne(bar, foo).setOneLeft(TestUtil.BarEntity::setFoo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -344,8 +346,8 @@ public final class LoaderTest {
         createRecord(
             ImmutableMap.of(FOO.ID, 2L, FOO.FOO_, 2, BAR.ID, 1L, BAR.FOOID, 2L, BAR.BAR_, 2)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    BarEntity expectedBar = new BarEntity(1L, 1L, 2, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, 1L, 2, null, null);
     expectedBar.setFoo(expectedFoo);
 
     assertThrows(ValidationException.class, () -> l.finisher().apply(objectGraph));
@@ -353,13 +355,13 @@ public final class LoaderTest {
 
   @Test
   public void testManyToMany() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<FooEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .manyToMany(foo, bar, FOOBAR)
-            .setManyLeft(FooEntity::setBarList)
-            .setManyRight(BarEntity::setFooList)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setManyRight(TestUtil.BarEntity::setFooList)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -378,8 +380,8 @@ public final class LoaderTest {
                 .put(FOOBAR.BARID, 1L)
                 .build()));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
-    BarEntity expectedBar = new BarEntity(1L, 1L, 2, null, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.BarEntity expectedBar = new TestUtil.BarEntity(1L, 1L, 2, null, null);
     expectedBar.setFooList(ImmutableList.of(expectedFoo));
     expectedFoo.setBarList(ImmutableList.of(expectedBar));
 
@@ -388,8 +390,8 @@ public final class LoaderTest {
 
   @Test
   public void testEmpty() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Loader<FooEntity> l = Loader.of(foo).build();
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Loader<TestUtil.FooEntity> l = Loader.of(foo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
 
@@ -398,14 +400,14 @@ public final class LoaderTest {
 
   @Test
   public void testRelationWithDummyRelationLoader() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
 
-    Loader<FooEntity> l =
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .manyToMany(foo, bar, FOOBAR)
-            .setManyLeft(FooEntity::setBarList)
-            .setManyRight(BarEntity::setFooList)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setManyRight(TestUtil.BarEntity::setFooList)
             .setRelationLoader(record -> Set.of(IdPair.of(1, 1)))
             .build();
 
@@ -423,21 +425,21 @@ public final class LoaderTest {
                 .put(BAR.BAR_, 2)
                 .build()));
 
-    List<FooEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.FooEntity> entities = l.finisher().apply(objectGraph);
     assertEquals(1, entities.size());
     assertEquals(1L, entities.get(0).getBarList().get(0).getId());
   }
 
   @Test
   public void testRelationWithCustomRelationLoader() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
 
-    Loader<FooEntity> l =
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .manyToMany(foo, bar, FOOBAR)
-            .setManyLeft(FooEntity::setBarList)
-            .setManyRight(BarEntity::setFooList)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setManyRight(TestUtil.BarEntity::setFooList)
             .setRelationLoader(LoaderTest::customRelationLoader)
             .build();
 
@@ -471,10 +473,10 @@ public final class LoaderTest {
                 .put(FOOBAR.BARID, 1L)
                 .build()));
 
-    List<FooEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.FooEntity> entities = l.finisher().apply(objectGraph);
     assertEquals(2, entities.size());
-    for (FooEntity entity : entities) {
-      ImmutableList<BarEntity> barList = entity.getBarList();
+    for (TestUtil.FooEntity entity : entities) {
+      ImmutableList<TestUtil.BarEntity> barList = entity.getBarList();
       assertEquals(1, barList.size());
       assertEquals(1L, barList.get(0).getId());
     }
@@ -482,14 +484,14 @@ public final class LoaderTest {
 
   @Test
   public void testFallbackToForeignKeyRelation() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
 
-    Loader<FooEntity> l =
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .manyToMany(foo, bar, FOOBAR)
-            .setManyLeft(FooEntity::setBarList)
-            .setManyRight(BarEntity::setFooList)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setManyRight(TestUtil.BarEntity::setFooList)
             .build();
 
     ObjectGraph objectGraph = l.supplier().get();
@@ -522,15 +524,15 @@ public final class LoaderTest {
                 .put(FOOBAR.BARID, 1L)
                 .build()));
 
-    List<FooEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.FooEntity> entities = l.finisher().apply(objectGraph);
     assertEquals(1L, entities.get(0).getBarList().get(0).getId());
     assertEquals(ImmutableList.of(), entities.get(1).getBarList());
   }
 
   @Test
   public void testLoadTwice() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Loader<FooEntity> l = Loader.of(foo).build();
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Loader<TestUtil.FooEntity> l = Loader.of(foo).build();
 
     ObjectGraph objectGraph = l.supplier().get();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
@@ -538,21 +540,21 @@ public final class LoaderTest {
     accumulator.accept(objectGraph, createRecord(ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 1)));
     accumulator.accept(objectGraph, createRecord(ImmutableMap.of(FOO.ID, 1L, FOO.FOO_, 2)));
 
-    FooEntity expectedFoo = new FooEntity(1L, 1, null);
+    TestUtil.FooEntity expectedFoo = new TestUtil.FooEntity(1L, 1, null);
 
-    List<FooEntity> entities = l.finisher().apply(objectGraph);
+    List<TestUtil.FooEntity> entities = l.finisher().apply(objectGraph);
     assertIterableEquals(ImmutableList.of(expectedFoo), entities);
   }
 
   @Test
   public void testRightFoldingCombiner() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<FooEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.FooEntity> l =
         Loader.of(foo)
             .manyToMany(foo, bar, FOOBAR)
-            .setManyLeft(FooEntity::setBarList)
-            .setManyRight(BarEntity::setFooList)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setManyRight(TestUtil.BarEntity::setFooList)
             .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
@@ -610,7 +612,7 @@ public final class LoaderTest {
     ObjectGraph thirdRight = supplier.get();
     accumulator.accept(thirdRight, fourthRecord);
 
-    List<FooEntity> entitiesRightFolded =
+    List<TestUtil.FooEntity> entitiesRightFolded =
         l.finisher().apply(combiner.apply(firstRight, combiner.apply(secondRight, thirdRight)));
 
     ObjectGraph firstLeft = supplier.get();
@@ -623,15 +625,15 @@ public final class LoaderTest {
     ObjectGraph thirdLeft = supplier.get();
     accumulator.accept(thirdLeft, fourthRecord);
 
-    List<FooEntity> entitiesLeftFolded =
+    List<TestUtil.FooEntity> entitiesLeftFolded =
         l.finisher().apply(combiner.apply(combiner.apply(firstLeft, secondLeft), thirdLeft));
 
-    FooEntity expectedFoo1 = new FooEntity(1L, 1, null);
-    FooEntity expectedFoo2 = new FooEntity(2L, 2, null);
-    BarEntity expectedBar1 = new BarEntity(1L, null, 1, null, null);
-    BarEntity expectedBar2 = new BarEntity(2L, null, 2, null, null);
-    BarEntity expectedBar3 = new BarEntity(3L, null, 3, null, null);
-    BarEntity expectedBar4 = new BarEntity(4L, null, 4, null, null);
+    TestUtil.FooEntity expectedFoo1 = new TestUtil.FooEntity(1L, 1, null);
+    TestUtil.FooEntity expectedFoo2 = new TestUtil.FooEntity(2L, 2, null);
+    TestUtil.BarEntity expectedBar1 = new TestUtil.BarEntity(1L, null, 1, null, null);
+    TestUtil.BarEntity expectedBar2 = new TestUtil.BarEntity(2L, null, 2, null, null);
+    TestUtil.BarEntity expectedBar3 = new TestUtil.BarEntity(3L, null, 3, null, null);
+    TestUtil.BarEntity expectedBar4 = new TestUtil.BarEntity(4L, null, 4, null, null);
     expectedFoo1.setBarList(ImmutableList.of(expectedBar1, expectedBar3));
     expectedFoo2.setBarList(ImmutableList.of(expectedBar2, expectedBar4));
     expectedBar1.setFooList(ImmutableList.of(expectedFoo1));
@@ -655,18 +657,18 @@ public final class LoaderTest {
    */
   @Test
   public void testCollectorIdentity() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .optionalOneToOne(bar, foo)
-            .setZeroOrOneLeft(BarEntity::setFooOptional)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setFooOptional)
             .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
     BinaryOperator<ObjectGraph> combiner = l.combiner();
-    Function<ObjectGraph, List<BarEntity>> finisher = l.finisher();
+    Function<ObjectGraph, List<TestUtil.BarEntity>> finisher = l.finisher();
 
     ObjectGraph a = supplier.get();
     accumulator.accept(a, createRecord(ImmutableMap.of(BAR.ID, 1L, BAR.BAR_, 2), FOO));
@@ -699,18 +701,18 @@ public final class LoaderTest {
    */
   @Test
   public void testCombinerAssociativity() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .optionalOneToOne(bar, foo)
-            .setZeroOrOneLeft(BarEntity::setFooOptional)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setFooOptional)
             .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
     BinaryOperator<ObjectGraph> combiner = l.combiner();
-    Function<ObjectGraph, List<BarEntity>> finisher = l.finisher();
+    Function<ObjectGraph, List<TestUtil.BarEntity>> finisher = l.finisher();
 
     Record t1 = createRecord(ImmutableMap.of(BAR.ID, 1L, BAR.BAR_, 1), FOO);
     Record t2 = createRecord(ImmutableMap.of(BAR.ID, 2L, BAR.BAR_, 2), FOO);
@@ -718,13 +720,13 @@ public final class LoaderTest {
     ObjectGraph a1 = supplier.get();
     accumulator.accept(a1, t1);
     accumulator.accept(a1, t2);
-    List<BarEntity> r1 = finisher.apply(a1);
+    List<TestUtil.BarEntity> r1 = finisher.apply(a1);
 
     ObjectGraph a2 = supplier.get();
     accumulator.accept(a2, t1);
     ObjectGraph a3 = supplier.get();
     accumulator.accept(a3, t2);
-    List<BarEntity> r2 = finisher.apply(combiner.apply(a2, a3));
+    List<TestUtil.BarEntity> r2 = finisher.apply(combiner.apply(a2, a3));
 
     assertEquals(r1, r2);
   }
@@ -738,17 +740,17 @@ public final class LoaderTest {
    */
   @Test
   public void testFinisherEquivalence() {
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l =
+    Entity<TestUtil.FooEntity, ?> foo = new Entity<>(FOO, TestUtil.FooEntity.class);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l =
         Loader.of(bar)
             .optionalOneToOne(bar, foo)
-            .setZeroOrOneLeft(BarEntity::setFooOptional)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setFooOptional)
             .build();
 
     Supplier<ObjectGraph> supplier = l.supplier();
     BiConsumer<ObjectGraph, Record> accumulator = l.accumulator();
-    Function<ObjectGraph, List<BarEntity>> finisher = l.finisher();
+    Function<ObjectGraph, List<TestUtil.BarEntity>> finisher = l.finisher();
 
     ObjectGraph a1 = supplier.get();
     accumulator.accept(a1, createRecord(ImmutableMap.of(BAR.ID, 1L, BAR.BAR_, 2), FOO));
@@ -762,27 +764,28 @@ public final class LoaderTest {
 
   @Test
   public void testCollectorCharacteristics() {
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<BarEntity> l = Loader.of(bar).build();
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.BarEntity> l = Loader.of(bar).build();
     assertIterableEquals(Set.of(), l.characteristics());
   }
 
   @Test
   public void testCollector() {
     Field<?> v = DSL.field("v", Integer.class);
-    Entity<FooEntity, ?> foo = new Entity<>(FOO, FooEntity.class).withExtraFields(v);
-    Entity<BarEntity, ?> bar = new Entity<>(BAR, BarEntity.class);
-    Loader<FooEntity> loader =
+    Entity<TestUtil.FooEntity, ?> foo =
+        new Entity<>(FOO, TestUtil.FooEntity.class).withExtraFields(v);
+    Entity<TestUtil.BarEntity, ?> bar = new Entity<>(BAR, TestUtil.BarEntity.class);
+    Loader<TestUtil.FooEntity> loader =
         Loader.of(foo)
             .manyToMany(foo, bar, FOOBAR)
-            .setManyLeft(FooEntity::setBarList)
-            .setManyRight(BarEntity::setFooList)
+            .setManyLeft(TestUtil.FooEntity::setBarList)
+            .setManyRight(TestUtil.BarEntity::setFooList)
             .and()
             .optionalOneToOne(bar, bar)
-            .setZeroOrOneLeft(BarEntity::setOtherBar)
+            .setZeroOrOneLeft(TestUtil.BarEntity::setOtherBar)
             .build();
 
-    List<FooEntity> entities =
+    List<TestUtil.FooEntity> entities =
         Stream.of(
                 createRecord(
                     ImmutableMap.<Field<?>, Object>builder()
@@ -853,16 +856,16 @@ public final class LoaderTest {
                         .put(FOOBAR.BARID, 2L)
                         .build()))
             .parallel()
-            .collect(toLinkedObjectsWith(loader));
+            .collect(Loader.toLinkedObjectsWith(loader));
 
-    FooEntity expectedFoo1 = new FooEntity(1L, 1, null, 42);
-    FooEntity expectedFoo2 = new FooEntity(2L, 2, null, 43);
-    FooEntity expectedFoo4 = new FooEntity(4L, 4, null, 44);
-    FooEntity expectedFoo6 = new FooEntity(6L, 6, null, 24);
-    BarEntity expectedBar1 = new BarEntity(1L, 1L, 1, 2L, null);
-    BarEntity expectedBar2 = new BarEntity(2L, 2L, 2, 1L, null);
-    BarEntity expectedBar3 = new BarEntity(3L, 3L, 3, 3L, null);
-    BarEntity expectedBar4 = new BarEntity(4L, 4L, 4, null, null);
+    TestUtil.FooEntity expectedFoo1 = new TestUtil.FooEntity(1L, 1, null, 42);
+    TestUtil.FooEntity expectedFoo2 = new TestUtil.FooEntity(2L, 2, null, 43);
+    TestUtil.FooEntity expectedFoo4 = new TestUtil.FooEntity(4L, 4, null, 44);
+    TestUtil.FooEntity expectedFoo6 = new TestUtil.FooEntity(6L, 6, null, 24);
+    TestUtil.BarEntity expectedBar1 = new TestUtil.BarEntity(1L, 1L, 1, 2L, null);
+    TestUtil.BarEntity expectedBar2 = new TestUtil.BarEntity(2L, 2L, 2, 1L, null);
+    TestUtil.BarEntity expectedBar3 = new TestUtil.BarEntity(3L, 3L, 3, 3L, null);
+    TestUtil.BarEntity expectedBar4 = new TestUtil.BarEntity(4L, 4L, 4, null, null);
 
     expectedFoo1.setBarList(ImmutableList.of(expectedBar1, expectedBar2));
     expectedFoo2.setBarList(ImmutableList.of(expectedBar1));

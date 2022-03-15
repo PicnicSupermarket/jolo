@@ -1,20 +1,50 @@
-name: CI pipeline for development
+name: Build & verify
 
-on: [push]
+on: [ push ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        jdk: [11, 17]
+        jdk: [ 11, 17 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.jdk }}
           distribution: 'temurin'
           cache: maven
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      - name: Build & verify with Maven
+        run: mvn verify -strict-checksums --errors --show-version --batch-mode --update-snapshots --file pom.xml
+      - run: mkdir staging && cp target/*.jar staging
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Package
+          path: staging
+  release-snapshot:
+    needs:
+      - build
+    # only release snapshots of commits on the master branch
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Publish package
+        run: mvn --batch-mode -Prelease -Drevision=${{ env.GITHUB_SHA }}-SNAPSHOT clean deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}

@@ -1,8 +1,4 @@
-package tech.picnic.jolo;
-
-import static tech.picnic.jolo.Util.getForeignKey;
-import static tech.picnic.jolo.Util.getOptionalForeignKey;
-import static tech.picnic.jolo.Util.validate;
+package io.github.ferdinandswoboda.folo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,7 +47,7 @@ final class LoaderBuilderImpl<T> implements LoaderBuilder<T> {
   @Override
   public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> oneToMany(
       Entity<L, L2> left, Entity<R, R2> right) {
-    return relation(left, right).oneToMany(getForeignKey(right.getTable(), left.getTable()));
+    return relation(left, right).oneToMany(Util.getForeignKey(right.getTable(), left.getTable()));
   }
 
   @Override
@@ -78,26 +74,27 @@ final class LoaderBuilderImpl<T> implements LoaderBuilder<T> {
   @Override
   public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> zeroOrOneToMany(
       Entity<L, L2> left, Entity<R, R2> right) {
-    return relation(left, right).zeroOrOneToMany(getForeignKey(right.getTable(), left.getTable()));
+    return relation(left, right)
+        .zeroOrOneToMany(Util.getForeignKey(right.getTable(), left.getTable()));
   }
 
   @Override
   public <L, R, L2 extends Record, R2 extends Record> RelationBuilder<T, L, R> manyToMany(
       Entity<L, L2> left, Entity<R, R2> right, Table<?> relation) {
-    TableField<?, Long> leftKey = getForeignKey(relation, left.getTable());
-    TableField<?, Long> rightKey = getForeignKey(relation, right.getTable());
+    TableField<?, Long> leftKey = Util.getForeignKey(relation, left.getTable());
+    TableField<?, Long> rightKey = Util.getForeignKey(relation, right.getTable());
     return relation(left, right).manyToMany(leftKey, rightKey);
   }
 
   @SuppressWarnings("NullAway")
   private static <L extends Record, R extends Record> TableField<?, Long> getForeignKeySymmetric(
       Table<L> left, Table<R> right) {
-    TableField<?, Long> leftKey = getOptionalForeignKey(right, left).orElse(null);
+    TableField<?, Long> leftKey = Util.getOptionalForeignKey(right, left).orElse(null);
     TableField<?, Long> rightKey =
         leftKey == null
-            ? getForeignKey(left, right)
-            : getOptionalForeignKey(left, right).orElse(null);
-    validate(
+            ? Util.getForeignKey(left, right)
+            : Util.getOptionalForeignKey(left, right).orElse(null);
+    Util.validate(
         leftKey == null || rightKey == null || leftKey.equals(rightKey),
         "One-to-one relationship between %s and %s is ambiguous, "
             + "please specify the foreign key explicitly",
@@ -119,7 +116,7 @@ final class LoaderBuilderImpl<T> implements LoaderBuilder<T> {
         entities.stream()
             .filter(e -> e.getPrimaryKey().equals(newEntity.getPrimaryKey()))
             .allMatch(e -> newEntity == e);
-    validate(
+    Util.validate(
         primaryKeyIdentifiesUniqueEntity, "Distinct entities cannot refer to the same primary key");
     entities.add(newEntity);
   }

@@ -1,6 +1,6 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
-import static tech.picnic.jolo.Util.validate;
+import static io.github.ferdinandswoboda.folo.Util.validate;
 
 import java.util.Collection;
 import java.util.List;

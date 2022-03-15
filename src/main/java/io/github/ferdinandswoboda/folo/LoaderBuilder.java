@@ -1,4 +1,4 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 import org.jooq.Record;
 import org.jooq.Table;

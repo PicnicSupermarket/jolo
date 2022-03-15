@@ -1,4 +1,4 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 import static java.util.Collections.emptySet;
 
@@ -48,6 +48,14 @@ public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> 
     this.relations = Set.copyOf(relations);
   }
 
+  /**
+   * Initiate a chained builder of a {@link Loader} that will load objects specified by the given
+   * {@link Entity}.
+   *
+   * @param mainEntity The given class to table mapping.
+   * @param <T> The type of objects to be loaded.
+   * @return The initial builder stage.
+   */
   public static <T> LoaderBuilder<T> of(Entity<T, ?> mainEntity) {
     return new LoaderBuilderImpl<>(mainEntity);
   }
@@ -55,6 +63,10 @@ public final class Loader<T> implements Collector<Record, ObjectGraph, List<T>> 
   /**
    * Convenience function for improved readability when calling the loader as a parameter of {@link
    * java.util.stream.Stream#collect(Collector)}. It returns the given loader.
+   *
+   * @param <T> Type of the objects to be loaded by the given loader.
+   * @param loader The given loader to be returned.
+   * @return The given loader.
    */
   public static <T> Loader<T> toLinkedObjectsWith(Loader<T> loader) {
     return loader;

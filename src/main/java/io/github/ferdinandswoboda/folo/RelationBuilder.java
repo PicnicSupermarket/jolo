@@ -1,7 +1,8 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
-import static tech.picnic.jolo.Util.validate;
+import static io.github.ferdinandswoboda.folo.Util.validate;
 
+import io.github.ferdinandswoboda.folo.Relation.Arity;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,7 +13,6 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Record;
 import org.jooq.TableField;
-import tech.picnic.jolo.Relation.Arity;
 
 /**
  * Class used to specify a {@link Relation}. Cannot be instantiated directly, but is created as part

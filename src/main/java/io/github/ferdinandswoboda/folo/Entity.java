@@ -1,8 +1,7 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 import static java.util.Arrays.stream;
 import static java.util.stream.Stream.concat;
-import static tech.picnic.jolo.Util.validate;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -72,7 +71,8 @@ public final class Entity<T, R extends Record> {
    * picked}. If it is mapped from a record that contains a (computed) {@code picked} column, then
    * the constructor with the extra argument is used to bring it into Java land.
    *
-   * @apiNote This method returns a new object.
+   * @param extraFields Any extra fields to load.
+   * @return A copy of this entity with the given fields added.
    */
   public Entity<T, R> withExtraFields(Field<?>... extraFields) {
     Field<?>[] extendedFields =
@@ -81,17 +81,17 @@ public final class Entity<T, R extends Record> {
     return new Entity<>(table, type, primaryKey, extendedFields);
   }
 
-  /** The table that is mapped by this entity. */
+  /** Returns the table that is mapped by this entity. */
   public Table<R> getTable() {
     return table;
   }
 
-  /** The primary key that this entity uses to distinguish records. */
+  /** Returns the primary key that this entity uses to distinguish records. */
   public Field<Long> getPrimaryKey() {
     return primaryKey;
   }
 
-  /** The given record's ID, corresponding to this entity. */
+  /** Returns the given record's ID, corresponding to this entity. */
   Optional<Long> getId(Record record) {
     check(record);
     return Optional.ofNullable(record.get(primaryKey));
@@ -132,7 +132,7 @@ public final class Entity<T, R extends Record> {
        * usage scenario this object will only ever be used with the same query, and therefore
        * we will always retrieve records with the same set of columns.
        */
-      validate(
+      Util.validate(
           primaryKey.equals(record.field(primaryKey)),
           "Primary key column %s not found in result record",
           primaryKey);

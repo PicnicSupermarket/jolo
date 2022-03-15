@@ -1,4 +1,4 @@
-package tech.picnic.jolo;
+package io.github.ferdinandswoboda.folo;
 
 public class ValidationException extends RuntimeException {
   /** The {@link java.io.Serializable serialization} ID. */
