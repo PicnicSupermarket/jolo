@@ -59,7 +59,7 @@
         <error-prone.args/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>LOCAL-SNAPSHOT</revision>
-        <version.auto-service>1.0</version.auto-service>
+        <version.auto-service>1.0.1</version.auto-service>
         <version.error-prone>2.10.0</version.error-prone>
         <version.guava>31.0.1-jre</version.guava>
         <version.guava-beta-checker>1.0</version.guava-beta-checker>
