@@ -15,7 +15,7 @@ Artifacts are hosted on [Maven's Central Repository][maven-central-browse]:
 
 ```groovy
 dependencies {
-    compile 'io.github.ferdinandswoboda.folo:folo:1.0.0'
+    compile 'io.github.ferdinand-swoboda.folo:folo:1.0.0'
 }
 ```
 
@@ -24,7 +24,7 @@ dependencies {
 ```xml
 
 <dependency>
-    <groupId>io.github.ferdinandswoboda.folo</groupId>
+    <groupId>io.github.ferdinand-swoboda.folo</groupId>
     <artifactId>folo</artifactId>
     <version>1.0.0</version>
 </dependency>
