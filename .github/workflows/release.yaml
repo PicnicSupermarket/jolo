@@ -1,13 +1,11 @@
-name: Publish package to the Maven Central Repository
+name: Publish to Maven Central Repository
 on:
   push:
     tags:
-      - '**'
+      - 'v*'
 jobs:
   publish:
     runs-on: ubuntu-latest
-    # only consider tags on the master branch
-    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Maven Central Repository
@@ -21,7 +19,7 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: Publish package
-        run: mvn --batch-mode -Prelease -Drevision=${GITHUB_SHA} clean deploy
+        run: mvn --batch-mode -Prelease -Drevision=${GITHUB_REF_NAME#v} clean deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

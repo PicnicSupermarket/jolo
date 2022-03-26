@@ -18,12 +18,6 @@ jobs:
           cache: maven
       - name: Build & verify with Maven
         run: mvn verify -strict-checksums --errors --show-version --batch-mode --update-snapshots --file pom.xml
-      - run: mkdir staging && cp target/*.jar staging
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: Package
-          path: staging
   release-snapshot:
     needs:
       - build
@@ -42,9 +36,15 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - name: Publish package
+      - name: Publish snapshot artifact
         run: mvn --batch-mode -Prelease -Drevision=${GITHUB_SHA}-SNAPSHOT clean deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      - run: mkdir staging && cp target/*.jar staging
+      - name: Upload artifact sources
+        uses: actions/upload-artifact@v3
+        with:
+         name: Sources
+         path: staging

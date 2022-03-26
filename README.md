@@ -43,8 +43,8 @@ dependencies {
 
 ## Limitations/Potential improvements
 
-- Investigate `@Nullable`, `@NonNull`, `@CheckReturnValue` and `@Contract` annotations.
 - Make use of Java modules (introduced in Java 9).
+- Investigate `@Nullable`, `@NonNull`, `@CheckReturnValue` and other annotations.
 - Only primary / foreign keys of (Java) type `long` are supported i.e. no composite or UUID keys.
 - Relation mapping does not work for entities that are not based on a table in the DB schema.
 
