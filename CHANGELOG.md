@@ -7,8 +7,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-This release marks the initial release of Folo - a fork of [Jolo]. Compared
-to [Jolo v0.0.2](https://github.com/PicnicSupermarket/jolo/releases/tag/v0.0.2) it introduces a backwards-incompatible
+
+
+## [v1.0.0]
+
+This release marks the initial release of Folo - a fork of [Jolo]. Compared to [Jolo v0.0.2] it introduces a backwards-incompatible
 makeover of the public API by simplifying the main `Loader` API, requiring JDK v11+ and Jooq v3.15+ and dropping
 multiple public methods.
 
@@ -37,7 +40,7 @@ multiple public methods.
 
 ### Upgrade Notes
 
-Coming from [Jolo v0.0.2](https://github.com/PicnicSupermarket/jolo/releases/tag/v0.0.2) perform these case-sensitive
+Coming from [Jolo v0.0.2] perform these case-sensitive
 string search & replace operations in places where you've previously used Jolo:
 
 - `LoaderFactory.create` -> `Loader.of`
@@ -48,6 +51,10 @@ string search & replace operations in places where you've previously used Jolo:
 Optionally, simplify e.g. `.collect(loader).stream().collect(toImmutableSet())`
 to `.collect(collectingAndThen(loader, ImmutableSet::copyOf))` and/or append `java.util.stream` operators as needed.
 
-[Unreleased]: https://github.com/ferdinand-swoboda/folo/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/ferdinand-swoboda/folo/compare/v1.0.0...HEAD
+
+[v1.0.0]: https://github.com/ferdinand-swoboda/folo/compare/v0.0.2...v1.0.0
 
 [Jolo]: https://github.com/PicnicSupermarket/jolo
+
+[Jolo v0.0.2]: https://github.com/PicnicSupermarket/jolo/releases/tag/v0.0.2
